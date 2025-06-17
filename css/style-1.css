@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #ffffff;
+  --color-secondary: #25a33a;
+  --color-bg: #141414;
+  --color-surface: #d6d6d6;
+  --color-text: #000000;
+  --color-green: #22c55e;
+  --radius: 12px;
+  --spacing: 16px;
+  --font-base: "Inter", sans-serif;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-base);
+}
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.app-container {
+  display: flex;
+  flex-direction: row-reverse;
+  height: 100vh;
+}
+.sidebar {
+  width: 280px;
+  background: var(--color-surface);
+  padding: var(--spacing);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+.sidebar-title {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing);
+  color: var(--color-text);
+}
+.sidebar-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+}
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  background: var(--color-surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-img {
+  width: 24px;
+  height: 24px;
+}
+.item-box {
+  flex: 1;
+}
+.item-title {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+.item-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+.item-xp {
+  color: var(--color-green);
+  font-weight: bold;
+}
+.sidebar-more {
+  display: block;
+  text-align: center;
+  margin-top: var(--spacing);
+  padding: 8px 0;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.main-content {
+  flex: 1;
+  padding: var(--spacing) 40px;
+  overflow-y: auto;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: #000000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing);
+  margin-bottom: 32px;
+}
+.track-card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+}
+.track-icon {
+  width: 32px;
+  height: 32px;
+}
+.track-details h3 {
+  font-size: 1rem;
+  color: var(--color-text);
+}
+.track-xp {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+.progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.progress-bg {
+  flex: 1;
+  background: #e4e7ff;
+  border-radius: var(--radius);
+  height: 8px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--color-secondary);
+}
+.progress-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.user-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing);
+}
+.user-name {
+  margin-top: 8px;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+.conquistas-box {
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.conq-title {
+  font-size: 1rem;
+  color: white;
+  margin-bottom: 12px;
+}
+.conq-button {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: #000000;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
