@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Formulário Conquista</title>
+</head>
+<body>
+    <div id="menu-container"></div>
+    <form onsubmit="enviarFormulario(event)">
+        <h1>Cadastro de Conquista</h1>
+
+        <p>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
+        </p>
+
+        <p>
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="descricao" required>
+        </p>
+
+        <p>
+            <label for="tipo">Tipo:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="MODULO_CONCLUIDO">Módulo Concluído</option>
+                <option value="TRILHA_CONCLUIDA">Trilha Concluída</option>
+                <option value="PROGRESSO">Conquista Especial</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="xpGanho">XP Ganho:</label>
+            <input type="number" id="xpGanho" name="xpGanho" required>
+        </p>
+
+        <button id="criar" type="submit">Enviar</button>
+        <button id="editar" type="submit" hidden>Editar</button>
+    </form>
+    <p id="cadastrada"></p>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (id) {
+            document.getElementById('criar').hidden = true;
+            document.getElementById('editar').hidden = false;
+            // Se houver um ID, busca os dados da conquista
+            fetch(`http://localhost:8080/api/conquistas/${id}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao buscar conquista');
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('nome').value = data.nome;
+                    document.getElementById('descricao').value = data.descricao;
+                    document.getElementById('tipo').value = data.tipo;
+                    document.getElementById('xpGanho').value = data.xpGanho;
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    document.getElementById('cadastrada').textContent = 'Erro ao carregar conquista.';
+                });
+        }
+
+
+        function enviarFormulario(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const descricao = document.getElementById('descricao').value;
+            const tipo = document.getElementById('tipo').value;
+            const xpGanho = document.getElementById('xpGanho').value;
+
+            const dados = {
+                nome: nome,
+                descricao: descricao,
+                tipo: tipo,
+                xpGanho: parseInt(xpGanho, 10)
+            };
+
+            fetch('http://localhost:8080/api/conquistas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro na requisição');
+                return response.json();
+            })
+            .then(data => {
+                console.log('Sucesso:', data);
+                document.getElementById('cadastrada').textContent = 'Conquista cadastrada com sucesso!';
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('cadastrada').textContent = 'Erro ao cadastrar conquista.';
+            }).finally(() => {
+                document.getElementById('nome').value = '';
+                document.getElementById('descricao').value = '';
+                document.getElementById('tipo').value = '';
+                document.getElementById('xpGanho').value = '';
+            });
+        }
+    </script>
+    <script src="/menu.js"></script>
+</body>
+</html>

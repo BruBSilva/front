@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário Trilha</title>
+</head>
+<body>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+    <div id="menu-container"></div>
+    <form onsubmit="enviarFormulario(event)">
+        <h1>Cadastro de Trilha</h1>
+
+        <p>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
+        </p>
+
+        <p>
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="descricao" required>
+        </p>
+
+        <p>
+            <label for="categorias">Categoria:</label>
+            <select name="categoria" id="categoria"></select>
+        </p>
+
+        <p>
+            <fieldset>
+                <legend>Conquistas</legend>
+                <input type="hidden" name="conquistas" id="JSONConquistas">
+                <div id="conquistas-container">
+                    <p>
+                        <label for="conquista">Conquista:</label>
+                        <select name="conquista" id="conquista"></select>
+                    </p>
+                    <button type="button" onclick="adicionarConquista()">Adicionar Conquista</button>
+                </div>
+            </fieldset>
+        </p>
+
+        <p>
+            <fieldset>
+                <legend>Módulos</legend>
+                <input type="hidden" name="modulos" id="JSONModulos">
+                <div id="modulos-container">
+                    <p>
+                        <label for="nomeModulo">Nome do Módulo:</label>
+                        <input type="text" id="nomeModulo" name="titulo">
+                    </p>
+                    <p>
+                        <label for="conteudoModulo">Conteúdo:</label>
+                        <br/>
+                        <input type="hidden" id="conteudoModulo" name="conteudo">
+                        <div id="editor">
+                            
+                        </div>
+                    </p>
+                    <p>
+                        <label for="ordemModulo">Ordem:</label>
+                        <input type="number" id="ordemModulo" name="ordem">
+                    </p>
+                    <button type="button" onclick="adicionarModulo()">Adicionar Módulo</button>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Conteúdo</th>
+                                <th>Ordem</th>
+                                <th colspan="2">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modulos-list">
+                            <!-- Os módulos adicionados serão exibidos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </fieldset>
+        </p>
+
+        <button type="submit">Enviar</button>
+
+    </form>
+
+    <p id="cadastrada"></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script>
+        const quill = new Quill('#editor', {
+            theme: 'snow'
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCategorias();
+            fetchConquistas();
+        });
+
+        async function fetchCategorias() {
+            try {
+                const response = await fetch('http://localhost:8080/api/categorias');
+                if (!response.ok) throw new Error('Erro ao buscar categorias');
+                const categorias = await response.json();
+                const select = document.getElementById('categoria');
+
+                categorias.content.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = categoria.nome;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function fetchConquistas() {
+            try {
+                const response = await fetch('http://localhost:8080/api/conquistas');
+                if (!response.ok) throw new Error('Erro ao buscar conquistas');
+                const conquistas = await response.json();
+                const select = document.getElementById('conquista');
+
+                conquistas.content.forEach(conquista => {
+                    const option = document.createElement('option');
+                    option.value = conquista.id;
+                    option.textContent = conquista.nome;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        function adicionarConquista() {
+            const container = document.getElementById('conquistas-container');
+            const input = document.getElementById('conquista');
+            if (input.value.trim() === '') return;
+
+            const p = document.createElement('p');
+            p.textContent = input.options[input.selectedIndex].textContent;
+            container.appendChild(p);
+            
+            const conquistasJson = JSON.parse(document.getElementById('JSONConquistas').value || '[]');
+            conquistasJson.push({ id: input.value });
+            document.getElementById('JSONConquistas').value = JSON.stringify(conquistasJson);
+            input.options[input.selectedIndex].remove();
+        }
+
+        function adicionarModulo() {
+            const titulo = document.getElementById('nomeModulo').value;
+            const conteudo = document.getElementById('conteudoModulo').value = quill.root.innerHTML;
+            const ordem = document.getElementById('ordemModulo').value;
+
+            if (!titulo|| !conteudo || !ordem) return;
+
+            const moduloData = {
+                titulo: titulo,
+                conteudo: conteudo,
+                ordem: parseInt(ordem, 10)
+            };
+
+            const modulosList = document.getElementById('modulos-list');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${moduloData.titulo}</td>
+                <td>${moduloData.conteudo}</td>
+                <td>${moduloData.ordem}</td>
+                <td><button type="button" onclick="editarModulo(this)">Editar</button></td>
+                <td><button type="button" onclick="removerModulo(this)">Remover</button></td>
+            `;
+            modulosList.appendChild(row);
+
+            const modulosJson = JSON.parse(document.getElementById('JSONModulos').value || '[]');
+            modulosJson.push(moduloData);
+            document.getElementById('JSONModulos').value = JSON.stringify(modulosJson);
+
+            // Limpar campos
+            document.getElementById('nomeModulo').value = '';
+            document.getElementById('conteudoModulo').value = '';
+            document.getElementById('ordemModulo').value = '';
+        }
+
+        function editarModulo(button) {
+            const row = button.parentElement.parentElement;
+            const titulo = row.cells[0].textContent;
+            const conteudo = row.cells[1].textContent;
+            const ordem = row.cells[2].textContent;
+
+            document.getElementById('nomeModulo').value = titulo;
+            document.getElementById('conteudoModulo').value = conteudo;
+            quill.root.innerHTML = conteudo;
+            document.getElementById('ordemModulo').value = ordem;
+
+            removerModulo(button);
+        }
+
+        function removerModulo(button) {
+            const row = button.parentElement.parentElement;
+            row.remove();
+
+            const modulosJson = JSON.parse(document.getElementById('JSONModulos').value || '[]');
+            const titulo = row.cells[0].textContent;
+            const conteudo = row.cells[1].textContent;
+            const ordem = parseInt(row.cells[2].textContent, 10);
+
+            const index = modulosJson.findIndex(modulo => 
+                modulo.titulo === titulo && 
+                modulo.conteudo === conteudo && 
+                modulo.ordem === ordem
+            );
+
+            if (index > -1) {
+                modulosJson.splice(index, 1);
+                document.getElementById('JSONModulos').value = JSON.stringify(modulosJson);
+            }
+        }
+
+        function enviarFormulario(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const descricao = document.getElementById('descricao').value;
+            const categoria = document.getElementById('categoria').value;
+            const conquistas = document.getElementById('JSONConquistas').value;
+            const modulos = document.getElementById('JSONModulos').value;
+
+            const dados = {
+                nome: nome,
+                descricao: descricao,
+                categoria: { id: categoria },
+                conquistas: JSON.parse(conquistas || '[]'),
+                modulos: JSON.parse(modulos || '[]')
+            };
+
+            fetch('http://localhost:8080/api/trilhas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro na requisição');
+                return response.json();
+            })
+            .then(data => {
+                console.log('Sucesso:', data);
+                document.getElementById('cadastrada').textContent = 'Trilha cadastrada com sucesso!';
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('cadastrada').textContent = 'Erro ao cadastrar trilha.';
+            });
+        }
+    </script>
+    <script src="/menu.js"></script>
+</body>
+</html>

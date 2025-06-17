@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista</title>
+</head>
+<body>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+    <div id="menu-container"></div>
+    <h1>Lista de Dados do Banco</h1>
+    <p>Esta página exibe os dados do banco de dados.</p>
+
+    <h2>Conquistas</h2>
+    <a href="forms/form-conquista.html">Criar Nova Conquista</a>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>XP Ganho</th>
+                <th colspan="2">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="conquistas-list">
+        </tbody>
+    </table>
+
+    <h2>Categorias</h2>
+    <a href="forms/form-categoria.html">Criar Nova Categoria</a>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th colspan="2">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="categorias-list">
+        </tbody>
+
+    </table>
+
+    <h2>Trilhas</h2>
+    <a href="forms/form-trilha.html">Criar Nova Trilha</a>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th colspan="2">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="trilhas-list">
+        </tbody>
+    </table>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchConquistas();
+            fetchCategorias();
+            fetchTrilhas();
+        });
+
+        async function fetchConquistas() {
+            try {
+                const response = await fetch('http://localhost:8080/api/conquistas');
+                if (!response.ok) throw new Error('Erro ao buscar conquistas');
+                
+                const conquistas = await response.json();
+                const listElement = document.getElementById('conquistas-list');
+
+                conquistas.content.forEach(conquista => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${conquista.id}</td>
+                        <td>${conquista.nome}</td>
+                        <td>${conquista.descricao}</td>
+                        <td>${conquista.tipo}</td>
+                        <td>${conquista.xpGanho}</td>
+                        <td><a href="javascript:editarConquista(${conquista.id});">Editar</a></td>
+                        <td><a href="javascript:removerConquista(${conquista.id});">Excluir</a></td>
+                    `;
+                    listElement.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function fetchCategorias() {
+            try {
+                const response = await fetch('http://localhost:8080/api/categorias');
+                if (!response.ok) throw new Error('Erro ao buscar categorias');
+                
+                const categorias = await response.json();
+                const listElement = document.getElementById('categorias-list');
+
+                categorias.content.forEach(categoria => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${categoria.id}</td>
+                        <td>${categoria.nome}</td>
+                        <td>${categoria.descricao}</td>
+                        <td><a href="forms/form-categoria.html?action=editar&id=${categoria.id}">Editar</a></td>
+                        <td><a href="forms/form-categoria.html?action=excluir&id=${categoria.id}">Excluir</a></td>
+                    `;
+                    listElement.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function fetchTrilhas() {
+            try {
+                const response = await fetch('http://localhost:8080/api/trilhas');
+                if (!response.ok) throw new Error('Erro ao buscar trilhas');
+                
+                const trilhas = await response.json();
+                const listElement = document.getElementById('trilhas-list');
+
+                trilhas.content.forEach(trilha => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${trilha.id}</td>
+                        <td>${trilha.nome}</td>
+                        <td>${trilha.descricao}</td>
+                        <td>${trilha.categoria.nome}</td>
+                        <td><a href="forms/form-trilha.html?action=editar&id=${trilha.id}">Editar</a></td>
+                        <td><a href="forms/form-trilha.html?action=excluir&id=${trilha.id}">Excluir</a></td>
+                    `;
+                    listElement.appendChild(row);
+                    trilha.modulos.forEach(modulo => {
+                        const moduloRow = document.createElement('tr');
+                        moduloRow.innerHTML = `<td rowspan="2">-</td><td>id: ${modulo.id}</td>
+                            <td colspan="4">${modulo.ordem} - ${modulo.titulo}</td>
+                        `;
+                        const moduloConteudoRow = document.createElement('tr');
+                        moduloConteudoRow.innerHTML = `<td colspan="5">${modulo.conteudo}</td>`;
+                        listElement.appendChild(moduloRow);
+                        listElement.appendChild(moduloConteudoRow);
+                    });
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        function removerConquista(id){
+            if (confirm('Tem certeza que deseja excluir esta conquista?')) {
+                fetch(`http://localhost:8080/api/conquistas/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao excluir conquista');
+                    alert('Conquista excluída com sucesso!');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir conquista.');
+                });
+            }
+        }
+
+        function editarConquista(id) {
+            window.location.href = `forms/form-conquista.html?id=${id}`;
+        }
+    </script>
+    <script src="menu.js"></script>
+</body>
+</html>
