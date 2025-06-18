@@ -27,7 +27,7 @@ export default function TrackCard({
             <h3 className="text-3xl font-semibold text-black/50">{language}: {level}</h3>
           </div>
           <div className=''>
-            <p className="text-3xl font-bold">{xp} xp</p>
+            <p className="text-3xl font-semibold text-black/50">{xp} xp</p>
           </div>
         </div>
         <div className='flex justify-between w-full px-4 mt-2'>

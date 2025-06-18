@@ -5,8 +5,8 @@ const UserAvatar = ({ src, level}) => {
   const avatarSrc = src || testeAvatar;
 
   return (
-    <div className="relative w-32 h-32">
-    <div className="w-32 h-32 rounded-full border-[6px] border-green-600 bg-white flex items-center justify-center relative">
+    <div className="relative w-36 h-36">
+    <div className="mt-10 w-36 h-36 rounded-full border-[6px] border-green-600 bg-white flex items-center justify-center relative">
         <img
         src={avatarSrc}
         alt="avatar"

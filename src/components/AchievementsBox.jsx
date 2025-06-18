@@ -32,7 +32,7 @@ const achievements = [
 
 export default function AchievementsBox() {
   return (
-    <div className="px-3 py-2 max-w-sm flex flex-col justify-center items-center bg-black/80 border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div className="mt-4 py-4 max-w-sm flex flex-col justify-center items-center bg-black/80 border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div className="px-4 mb-3">
         <h2 className="text-white text-lg font-semibold">
           Conquistas
@@ -43,16 +43,16 @@ export default function AchievementsBox() {
         {achievements.map((item) => (
           <li
             key={item.id}
-            className="flex items-center bg-gray-100 rounded-full justify-between px-3 pl-0 mb-1"
+            className="flex items-center bg-gray-100 rounded-full justify-between px-14 pl-0 mb-1"
           >
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               <div className="bg-white p-3 rounded-full">
                 {item.icon}
               </div>
-              <span className="text-sm font-fancy text-black/80">{item.title}</span>
+              <span className="font-fancy text-black/80">{item.title}</span>
             </div>
-            <div className="text-right text-[0.5rem] ml-3">
-              <div className="text-green-600 font-fancy text-[0.7rem]">
+            <div className="text-right text-[0.8rem] ml-3 -mr-8">
+              <div className="text-green-600 font-fancy text-[0.9rem]">
                 {item.xp} XP
               </div>
               <div className=" text-gray-500">{item.date}</div>
@@ -61,7 +61,7 @@ export default function AchievementsBox() {
         ))}
       </ul>
 
-      <button className="w-52 py-1 mt-3 text-center text-sm font-small text-black/80 bg-white hover:bg-gray-200 transition-colors duration-300 font-semibold rounded-md">
+      <button className="w-52 py-1 mt-3 text-center font-small text-black/80 bg-white hover:bg-gray-200 transition-colors duration-300 font-semibold rounded-md">
         Ver Mais
       </button>
     </div>
