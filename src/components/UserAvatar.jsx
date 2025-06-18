@@ -13,7 +13,7 @@ const UserAvatar = ({ src, level}) => {
         className="w-full h-full object-cover rounded-full"
         />
 
-        <div className="absolute left-1/2 -translate-x-1/2 bg-black text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-md z-10" 
+        <div className="absolute left-1/2 -translate-x-1/2 bg-black/90 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-md z-10" 
         style={{ bottom: '-6px' }}>
         {level}
         </div>
