@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import Home from './pages/Home'
+import Trilha from './pages/Trilha'
 import { store } from './store'
 import UserDrawer from './components/UserDrawer'
 
@@ -11,16 +12,14 @@ export default function App() {
   return (
     <Provider store={store}>
       <Router>
-        {/* wrapper geral */}
         <div className="flex min-h-screen">
-          {/* conteúdo principal */}
           <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
             <Routes>
+              <Route path="/trilha" element={<Trilha />} />
               <Route path="/" element={<Home />} />
             </Routes>
           </div>
 
-          {/* drawer fixo na direita */}
           {drawerOpen && (
             <div className="fixed top-0 right-0 h-screen w-96 z-50">
               <UserDrawer setOpen={setDrawerOpen} />
@@ -28,7 +27,6 @@ export default function App() {
           )}
         </div>
 
-        {/* botão de reabrir o drawer */}
         {!drawerOpen && (
           <button
             onClick={() => setDrawerOpen(true)}

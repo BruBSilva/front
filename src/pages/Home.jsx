@@ -1,15 +1,13 @@
 import React from 'react'
 import TrackCard from '../components/TrackCard'
 import ActionsBar from '../components/ActionsBar'
+import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
+  const navigate = useNavigate()
   const cards = [
     { language:'C#', level:'Iniciante', status:'Em andamento', xp:100, xpGain:30, progress:30 },
-    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
-    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
-    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
-    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
-    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
+    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{navigate(`/trilha`)} },
     { language:'C++', level:'Iniciante', status:'Completo',    xp:100, xpGain:100, progress:100 }
   ]
 
