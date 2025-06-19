@@ -7,7 +7,7 @@ export default function UserDrawer({setOpen}) {
   const [username] = useState("João Antonio A. B. Camilo")
 
   return (
-    <div className="h-full w-96 bg-[#E4E4E4] shadow-lg flex flex-col items-center p-7 space-y-12 relative transition-all duration-300">
+    <div className="h-screen w-full bg-[#E4E4E4] shadow-lg flex flex-col items-center p-7 space-y-12 relative">
       <button onClick={() => setOpen(false)} className="absolute top-5 left-3 bg-white text-black px-1.5 py-2 rounded-2xl shadow-lg hover:bg-gray-100 transition-colors duration-300">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="size-8">
           <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />

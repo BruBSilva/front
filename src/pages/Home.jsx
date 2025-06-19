@@ -1,15 +1,20 @@
 import React from 'react'
 import TrackCard from '../components/TrackCard'
+import ActionsBar from '../components/ActionsBar'
 
 export default function Home() {
   const cards = [
     { language:'C#', level:'Iniciante', status:'Em andamento', xp:100, xpGain:30, progress:30 },
     { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
+    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
+    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
+    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
+    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{/* acionar */} },
     { language:'C++', level:'Iniciante', status:'Completo',    xp:100, xpGain:100, progress:100 }
   ]
 
   return (
-    <div className="min-h-screen min-w-screen bg-[#0e0e0e] text-white">
+    <div className=" min-w-screen bg-[#0e0e0e] text-white">
       <div className="text-center mb-10 mt-16">
         <h1 className="text-3xl md:text-7xl font-bold text-[#E4E4E4] font-fancy mt-4 tracking-tight">
           Bem-vindo ao <span className="text-green-600">Corvis</span>
@@ -19,8 +24,12 @@ export default function Home() {
         </p>
         <hr className="border-t border-green-600/50 w-[97%] mx-auto mt-6" />
       </div>
-      <div className="p-6 grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
-        {cards.map((c,i) => (
+      <ActionsBar 
+      onAdd={() => {}} 
+      onFilter={() => {}} 
+      onSort={() => {}} />
+      <div className="grid gap-6 p-6 transition-all duration-300 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+        {cards.map((c, i) => (
           <TrackCard key={i} {...c} />
         ))}
       </div>

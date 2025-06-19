@@ -11,27 +11,34 @@ export default function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div className="flex h-screen">
-          <div className="flex-1 relative">
-            {!drawerOpen && (
-              <button
-                onClick={() => setDrawerOpen(true)}
-                className="fixed right-5 top-5 z-50 bg-white text-black px-1.5 py-2 rounded-2xl shadow-lg hover:bg-gray-200 transition-colors duration-300"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="size-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-            )}
+        {/* wrapper geral */}
+        <div className="flex min-h-screen">
+          {/* conteúdo principal */}
+          <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
             <Routes>
               <Route path="/" element={<Home />} />
-              {/* outras rotas aqui se quiser */}
             </Routes>
           </div>
-          <div className={`transition-all duration-300 ${drawerOpen ? 'w-96' : 'w-0 overflow-hidden'}`}>
-            <UserDrawer setOpen={setDrawerOpen} />
-          </div>
+
+          {/* drawer fixo na direita */}
+          {drawerOpen && (
+            <div className="fixed top-0 right-0 h-screen w-96 z-50">
+              <UserDrawer setOpen={setDrawerOpen} />
+            </div>
+          )}
         </div>
+
+        {/* botão de reabrir o drawer */}
+        {!drawerOpen && (
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="fixed right-5 top-5 z-50 bg-white text-black px-1.5 py-2 rounded-2xl shadow-lg hover:bg-gray-200 transition-colors duration-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="size-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+        )}
       </Router>
     </Provider>
   )
