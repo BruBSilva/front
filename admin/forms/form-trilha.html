@@ -62,7 +62,6 @@
         <p>
             <fieldset>
                 <legend>Módulos</legend>
-                <input type="hidden" name="modulos" id="JSONModulos">
                 <div id="modulos-container">
                     <p>
                         <label for="ordemModulo">Ordem:</label>
@@ -145,7 +144,6 @@
                         document.getElementById('descricaoConquista').value = trilha.conquista.descricao;
                         document.getElementById('xpGanho').value = trilha.conquista.xpGanho;
                         document.getElementById('idConquista').value = trilha.conquista.id;
-                        document.getElementById('JSONModulos').value = JSON.stringify(trilha.modulos || []);
                         const modulosList = document.getElementById('modulos-list');
                         trilha.modulos.forEach(modulo => {
                             const row = document.createElement('tr');
@@ -224,10 +222,6 @@
             `;
             modulosList.appendChild(row);
 
-            const modulosJson = JSON.parse(document.getElementById('JSONModulos').value || '[]');
-            modulosJson.push(moduloData);
-            document.getElementById('JSONModulos').value = JSON.stringify(modulosJson);
-
             document.getElementById('nomeModulo').value = '';
             document.getElementById('conteudoModulo').value = '';
             document.getElementById('ordemModulo').value = '';
@@ -240,7 +234,7 @@
         function editarModulo(button) {
             const row = button.parentElement.parentElement;
             const titulo = row.cells[0].textContent;
-            const conteudo = row.cells[1].textContent;
+            const conteudo = row.cells[1].innerHTML;
             const ordem = row.cells[2].textContent;
             const conquistaNome = row.getAttribute("conquista-nome");
             const conquistaDescricao = row.getAttribute("conquista-descricao");
@@ -248,11 +242,11 @@
 
             document.getElementById('nomeModulo').value = titulo;
             document.getElementById('conteudoModulo').value = conteudo;
-            quill.root.innerHTML = conteudo;
             document.getElementById('ordemModulo').value = ordem;
             document.getElementById('nomeConquistaModulo').value = conquistaNome;
             document.getElementById('descricaoConquistaModulo').value = conquistaDescricao;
             document.getElementById('xpGanhoModulo').value = conquistaXp;
+            quill.root.innerHTML = conteudo;
 
             removerModulo(button);
         }
@@ -260,22 +254,6 @@
         function removerModulo(button) {
             const row = button.parentElement.parentElement;
             row.remove();
-
-            const modulosJson = JSON.parse(document.getElementById('JSONModulos').value || '[]');
-            const titulo = row.cells[0].textContent;
-            const conteudo = row.cells[1].textContent;
-            const ordem = parseInt(row.cells[2].textContent, 10);
-
-            const index = modulosJson.findIndex(modulo => 
-                modulo.titulo === titulo && 
-                modulo.conteudo === conteudo && 
-                modulo.ordem === ordem
-            );
-
-            if (index > -1) {
-                modulosJson.splice(index, 1);
-                document.getElementById('JSONModulos').value = JSON.stringify(modulosJson);
-            }
         }
 
         function enviarFormulario(event) {
@@ -290,14 +268,25 @@
                 descricao: document.getElementById('descricaoConquista').value,
                 xpGanho: document.getElementById('xpGanho').value
             }
-            const modulos = document.getElementById('JSONModulos').value;
+            const modulosJSON = JSON.parse(JSON.stringify(Array.from(document.querySelectorAll('#modulos-list tr')).map(row => {
+                return {
+                    titulo: row.cells[0].textContent,
+                    conteudo: row.cells[1].innerHTML,
+                    ordem: parseInt(row.cells[2].textContent, 10),
+                    conquista: {
+                        nome: row.getAttribute("conquista-nome"),
+                        descricao: row.getAttribute("conquista-descricao"),
+                        xpGanho: row.getAttribute("conquista-xp")
+                    }
+                };
+            })));
 
             const dados = {
                 nome: nome,
                 descricao: descricao,
                 categoria: { id: categoria },
                 conquista,
-                modulos: JSON.parse(modulos || '[]')
+                modulos: modulosJSON
             };
 
             let url = 'http://localhost:8080/api/trilhas';
