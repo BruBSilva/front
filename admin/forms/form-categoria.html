@@ -19,6 +19,28 @@
     <p id="cadastrada"></p>
 
     <script>
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+        document.addEventListener("DOMContentLoaded", function() {
+            if (id) {
+                fetch('http://localhost:8080/api/categorias/' + id)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Erro ao buscar categoria");
+                        }
+                        return response.json();
+                    })
+                    .then(categoria => {
+                        document.getElementById('nome').value = categoria.nome;
+                        document.getElementById('descricao').value = categoria.descricao;
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao carregar categoria');
+                    });
+            }
+        });
+
         function enviarFormulario(event) {
             event.preventDefault();  // Evita o reload da página
 
@@ -30,8 +52,17 @@
                 descricao: descricao
             };
 
-            fetch('http://localhost:8080/api/categorias', {
-                method: 'POST',
+            let url = 'http://localhost:8080/api/categorias';
+            let metodo = 'POST';
+
+            if (id) {
+                url += '/' + id;
+                metodo = 'PUT';
+                dados.id = id;
+            }
+
+            fetch(url, {
+                method: metodo,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -43,14 +74,19 @@
             })
             .then(data => {
                 console.log('Sucesso:', data);
-                document.getElementById('cadastrada').textContent = 'Categoria cadastrada com sucesso!';
+                document.getElementById('cadastrada').textContent = 'Categoria salva com sucesso!';
+                if (id) {
+                    setTimeout(() => {
+                        window.location.href = '/admin/lista-dados-banco.html';
+                    }, 2000);
+                } else {
+                    document.getElementById('nome').value = '';
+                    document.getElementById('descricao').value = '';
+                }
             })
             .catch(error => {
                 console.error('Erro:', error);
-                document.getElementById('cadastrada').textContent = 'Erro ao cadastrar categoria.';
-            }).finally(() => {
-                document.getElementById('nome').value = '';
-                document.getElementById('descricao').value = '';
+                document.getElementById('cadastrada').textContent = 'Erro ao salvar categoria.';
             });
         }
     </script>

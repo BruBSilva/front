@@ -20,24 +20,7 @@
     <div id="menu-container"></div>
     <h1>Lista de Dados do Banco</h1>
     <p>Esta página exibe os dados do banco de dados.</p>
-
-    <h2>Conquistas</h2>
-    <a href="forms/form-conquista.html">Criar Nova Conquista</a>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Tipo</th>
-                <th>XP Ganho</th>
-                <th colspan="2">Ações</th>
-            </tr>
-        </thead>
-        <tbody id="conquistas-list">
-        </tbody>
-    </table>
-
+    
     <h2>Categorias</h2>
     <a href="forms/form-categoria.html">Criar Nova Categoria</a>
     <table>
@@ -51,7 +34,7 @@
         </thead>
         <tbody id="categorias-list">
         </tbody>
-
+        
     </table>
 
     <h2>Trilhas</h2>
@@ -69,6 +52,22 @@
         <tbody id="trilhas-list">
         </tbody>
     </table>
+
+    <h2>Conquistas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>XP Ganho</th>
+            </tr>
+        </thead>
+        <tbody id="conquistas-list">
+        </tbody>
+    </table>
+
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -93,8 +92,6 @@
                         <td>${conquista.descricao}</td>
                         <td>${conquista.tipo}</td>
                         <td>${conquista.xpGanho}</td>
-                        <td><a href="javascript:editarConquista(${conquista.id});">Editar</a></td>
-                        <td><a href="javascript:removerConquista(${conquista.id});">Excluir</a></td>
                     `;
                     listElement.appendChild(row);
                 });
@@ -117,8 +114,8 @@
                         <td>${categoria.id}</td>
                         <td>${categoria.nome}</td>
                         <td>${categoria.descricao}</td>
-                        <td><a href="forms/form-categoria.html?action=editar&id=${categoria.id}">Editar</a></td>
-                        <td><a href="forms/form-categoria.html?action=excluir&id=${categoria.id}">Excluir</a></td>
+                        <td><a href="forms/form-categoria.html?id=${categoria.id}">Editar</a></td>
+                        <td><a href="javascript:removerCategoria(${categoria.id})">Excluir</a></td>
                     `;
                     listElement.appendChild(row);
                 });
@@ -142,8 +139,8 @@
                         <td>${trilha.nome}</td>
                         <td>${trilha.descricao}</td>
                         <td>${trilha.categoria.nome}</td>
-                        <td><a href="forms/form-trilha.html?action=editar&id=${trilha.id}">Editar</a></td>
-                        <td><a href="forms/form-trilha.html?action=excluir&id=${trilha.id}">Excluir</a></td>
+                        <td><a href="forms/form-trilha.html?id=${trilha.id}">Editar</a></td>
+                        <td><a href="javascript:removerTrilha(${trilha.id})">Excluir</a></td>
                     `;
                     listElement.appendChild(row);
                     trilha.modulos.forEach(modulo => {
@@ -162,25 +159,38 @@
             }
         }
 
-        function removerConquista(id){
-            if (confirm('Tem certeza que deseja excluir esta conquista?')) {
-                fetch(`http://localhost:8080/api/conquistas/${id}`, {
+        function removerCategoria(id){
+            if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+                fetch(`http://localhost:8080/api/categorias/${id}`, {
                     method: 'DELETE'
                 })
                 .then(response => {
-                    if (!response.ok) throw new Error('Erro ao excluir conquista');
-                    alert('Conquista excluída com sucesso!');
+                    if (!response.ok) throw new Error('Erro ao excluir categoria');
+                    alert('Categoria excluída com sucesso!');
                     location.reload();
                 })
                 .catch(error => {
                     console.error('Erro:', error);
-                    alert('Erro ao excluir conquista.');
+                    alert('Erro ao excluir categoria.');
                 });
             }
         }
 
-        function editarConquista(id) {
-            window.location.href = `forms/form-conquista.html?id=${id}`;
+        function removerTrilha(id){
+            if (confirm('Tem certeza que deseja excluir esta trilha?')) {
+                fetch(`http://localhost:8080/api/trilhas/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao excluir trilha');
+                    alert('Trilha excluída com sucesso!');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir trilha.');
+                });
+            }
         }
     </script>
     <script src="menu.js"></script>

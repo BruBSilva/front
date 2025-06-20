@@ -40,14 +40,21 @@
 
         <p>
             <fieldset>
-                <legend>Conquistas</legend>
-                <input type="hidden" name="conquistas" id="JSONConquistas">
-                <div id="conquistas-container">
+                <legend>Conquista da Trilha</legend>
+                <div id="form-conquista-trilha">
+                    <input type="hidden" id="idConquista" name="idConquista">
                     <p>
-                        <label for="conquista">Conquista:</label>
-                        <select name="conquista" id="conquista"></select>
+                        <label for="nomeConquista">Nome:</label>
+                        <input type="text" id="nomeConquista" name="nomeConquista">
                     </p>
-                    <button type="button" onclick="adicionarConquista()">Adicionar Conquista</button>
+                    <p>
+                        <label for="descricaoConquista">Descrição:</label>
+                        <input type="text" id="descricaoConquista" name="descricaoConquista">
+                    </p>
+                    <p>
+                        <label for="xpGanho">XP Ganho:</label>
+                        <input type="number" id="xpGanho" name="xpGanho">
+                    </p>
                 </div>
             </fieldset>
         </p>
@@ -57,6 +64,10 @@
                 <legend>Módulos</legend>
                 <input type="hidden" name="modulos" id="JSONModulos">
                 <div id="modulos-container">
+                    <p>
+                        <label for="ordemModulo">Ordem:</label>
+                        <input type="number" id="ordemModulo" name="ordem">
+                    </p>
                     <p>
                         <label for="nomeModulo">Nome do Módulo:</label>
                         <input type="text" id="nomeModulo" name="titulo">
@@ -70,8 +81,23 @@
                         </div>
                     </p>
                     <p>
-                        <label for="ordemModulo">Ordem:</label>
-                        <input type="number" id="ordemModulo" name="ordem">
+                        <fieldset>
+                            <legend>Conquista do Módulo</legend>
+                            <div id="form-conquista-modulo">
+                                <p>
+                                    <label for="nomeConquista">Nome:</label>
+                                    <input type="text" id="nomeConquistaModulo" name="nomeConquistaModulo">
+                                </p>
+                                <p>
+                                    <label for="descricaoConquista">Descrição:</label>
+                                    <input type="text" id="descricaoConquistaModulo" name="descricaoConquistaModulo">
+                                </p>
+                                <p>
+                                    <label for="xpGanho">XP Ganho:</label>
+                                    <input type="number" id="xpGanhoModulo" name="xpGanhoModulo">
+                                </p>
+                            </div>
+                        </fieldset>
                     </p>
                     <button type="button" onclick="adicionarModulo()">Adicionar Módulo</button>
 
@@ -100,12 +126,51 @@
 
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script>
-        const quill = new Quill('#editor', {
-            theme: 'snow'
-        });
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
         document.addEventListener('DOMContentLoaded', () => {
             fetchCategorias();
-            fetchConquistas();
+
+            if (id) {
+                fetch(`http://localhost:8080/api/trilhas/${id}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Erro ao buscar trilha');
+                        return response.json();
+                    })
+                    .then(trilha => {
+                        document.getElementById('nome').value = trilha.nome;
+                        document.getElementById('descricao').value = trilha.descricao;
+                        document.getElementById('categoria').value = trilha.categoria.id;
+                        document.getElementById('nomeConquista').value = trilha.conquista.nome;
+                        document.getElementById('descricaoConquista').value = trilha.conquista.descricao;
+                        document.getElementById('xpGanho').value = trilha.conquista.xpGanho;
+                        document.getElementById('idConquista').value = trilha.conquista.id;
+                        document.getElementById('JSONModulos').value = JSON.stringify(trilha.modulos || []);
+                        const modulosList = document.getElementById('modulos-list');
+                        trilha.modulos.forEach(modulo => {
+                            const row = document.createElement('tr');
+                            row.setAttribute("conquista-nome", modulo.conquista.nome);
+                            row.setAttribute("conquista-descricao", modulo.conquista.descricao);
+                            row.setAttribute("conquista-xp", modulo.conquista.xpGanho);
+                            row.innerHTML = `
+                                <td>${modulo.titulo}</td>
+                                <td>${modulo.conteudo}</td>
+                                <td>${modulo.ordem}</td>
+                                <td><button type="button" onclick="editarModulo(this)">Editar</button></td>
+                                <td><button type="button" onclick="removerModulo(this)">Remover</button></td>
+                            `;
+                            modulosList.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao carregar trilha');
+                    });
+            }
+        });
+
+        const quill = new Quill('#editor', {
+            theme: 'snow'
         });
 
         async function fetchCategorias() {
@@ -126,54 +191,30 @@
             }
         }
 
-        async function fetchConquistas() {
-            try {
-                const response = await fetch('http://localhost:8080/api/conquistas');
-                if (!response.ok) throw new Error('Erro ao buscar conquistas');
-                const conquistas = await response.json();
-                const select = document.getElementById('conquista');
-
-                conquistas.content.forEach(conquista => {
-                    const option = document.createElement('option');
-                    option.value = conquista.id;
-                    option.textContent = conquista.nome;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        }
-
-        function adicionarConquista() {
-            const container = document.getElementById('conquistas-container');
-            const input = document.getElementById('conquista');
-            if (input.value.trim() === '') return;
-
-            const p = document.createElement('p');
-            p.textContent = input.options[input.selectedIndex].textContent;
-            container.appendChild(p);
-            
-            const conquistasJson = JSON.parse(document.getElementById('JSONConquistas').value || '[]');
-            conquistasJson.push({ id: input.value });
-            document.getElementById('JSONConquistas').value = JSON.stringify(conquistasJson);
-            input.options[input.selectedIndex].remove();
-        }
-
         function adicionarModulo() {
             const titulo = document.getElementById('nomeModulo').value;
             const conteudo = document.getElementById('conteudoModulo').value = quill.root.innerHTML;
             const ordem = document.getElementById('ordemModulo').value;
+            let conquista = {
+                nome: document.getElementById('nomeConquistaModulo').value,
+                descricao: document.getElementById('descricaoConquistaModulo').value,
+                xpGanho: document.getElementById('xpGanhoModulo').value
+            }
 
-            if (!titulo|| !conteudo || !ordem) return;
+            if (!titulo|| !conteudo || !ordem || !conquista) return;
 
             const moduloData = {
-                titulo: titulo,
-                conteudo: conteudo,
-                ordem: parseInt(ordem, 10)
+                titulo,
+                conteudo,
+                ordem: parseInt(ordem, 10),
+                conquista
             };
 
             const modulosList = document.getElementById('modulos-list');
             const row = document.createElement('tr');
+            row.setAttribute("conquista-nome", moduloData.conquista.nome);
+            row.setAttribute("conquista-descricao", moduloData.conquista.descricao);
+            row.setAttribute("conquista-xp", moduloData.conquista.xpGanho);
             row.innerHTML = `
                 <td>${moduloData.titulo}</td>
                 <td>${moduloData.conteudo}</td>
@@ -187,10 +228,13 @@
             modulosJson.push(moduloData);
             document.getElementById('JSONModulos').value = JSON.stringify(modulosJson);
 
-            // Limpar campos
             document.getElementById('nomeModulo').value = '';
             document.getElementById('conteudoModulo').value = '';
             document.getElementById('ordemModulo').value = '';
+            document.getElementById('nomeConquistaModulo').value = '';
+            document.getElementById('descricaoConquistaModulo').value = '';
+            document.getElementById('xpGanhoModulo').value = '';
+            quill.root.innerHTML = '';
         }
 
         function editarModulo(button) {
@@ -198,11 +242,17 @@
             const titulo = row.cells[0].textContent;
             const conteudo = row.cells[1].textContent;
             const ordem = row.cells[2].textContent;
+            const conquistaNome = row.getAttribute("conquista-nome");
+            const conquistaDescricao = row.getAttribute("conquista-descricao");
+            const conquistaXp = row.getAttribute("conquista-xp");
 
             document.getElementById('nomeModulo').value = titulo;
             document.getElementById('conteudoModulo').value = conteudo;
             quill.root.innerHTML = conteudo;
             document.getElementById('ordemModulo').value = ordem;
+            document.getElementById('nomeConquistaModulo').value = conquistaNome;
+            document.getElementById('descricaoConquistaModulo').value = conquistaDescricao;
+            document.getElementById('xpGanhoModulo').value = conquistaXp;
 
             removerModulo(button);
         }
@@ -234,19 +284,34 @@
             const nome = document.getElementById('nome').value;
             const descricao = document.getElementById('descricao').value;
             const categoria = document.getElementById('categoria').value;
-            const conquistas = document.getElementById('JSONConquistas').value;
+            const conquista = {
+                id: document.getElementById('idConquista').value,
+                nome: document.getElementById('nomeConquista').value,
+                descricao: document.getElementById('descricaoConquista').value,
+                xpGanho: document.getElementById('xpGanho').value
+            }
             const modulos = document.getElementById('JSONModulos').value;
 
             const dados = {
                 nome: nome,
                 descricao: descricao,
                 categoria: { id: categoria },
-                conquistas: JSON.parse(conquistas || '[]'),
+                conquista,
                 modulos: JSON.parse(modulos || '[]')
             };
 
-            fetch('http://localhost:8080/api/trilhas', {
-                method: 'POST',
+            let url = 'http://localhost:8080/api/trilhas';
+            let metodo = 'POST';
+
+            if (id) {
+                url += '/' + id;
+                metodo = 'PUT';
+                dados.id = id;
+                conquista.id = document.getElementById('idConquista').value;
+            }
+
+            fetch(url, {
+                method: metodo,
                 headers: {
                     'Content-Type': 'application/json'
                 },
