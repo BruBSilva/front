@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-  fetch('../admin/menu.html')
+  fetch('/admin/menu.html')
     .then(response => response.text())
     .then(data => {
       document.getElementById('menu-container').innerHTML = data;
