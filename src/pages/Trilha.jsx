@@ -1,4 +1,5 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
+import TrackDrawer from '../components/TrackDrawer'
 import ReactFlow, {
   Handle,
   Position,
@@ -23,8 +24,18 @@ const mainX = 300
 const leftX = 50
 const rightX = 550
 
+const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse nibh sapien, bibendum nec eros ac, cursus tempor quam. Maecenas luctus, magna a eleifend commodo, odio urna congue ex, id congue ipsum velit id urna. Vestibulum pharetra dictum justo sit amet hendrerit. Maecenas pulvinar elit at magna condimentum, feugiat sagittis quam finibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi sollicitudin purus condimentum magna vulputate lobortis et vitae est. Pellentesque nec felis suscipit, cursus enim in, pellentesque purus. Etiam nunc velit, vestibulum ultricies cursus sed, consequat sed nibh. Cras non urna tristique, fringilla nunc in, luctus tortor. Vivamus ornare nibh in lacus ullamcorper, fringilla efficitur tellus malesuada. Suspendisse nec porta odio. Praesent vestibulum sit amet dui a maximus. Nunc sem libero, bibendum ut justo ac, mattis consectetur nunc. Sed scelerisque ligula leo, id vestibulum quam aliquet eget. Pellentesque lacinia tempor lacinia.
+
+Aliquam eget aliquam odio, eu congue lacus. Donec lobortis lacinia est et consectetur. Interdum et malesuada fames ac ante ipsum primis in faucibus. In diam massa, suscipit vitae finibus commodo, rutrum vitae leo. Nam posuere eros sit amet mauris convallis scelerisque. Praesent eu justo nisi. Proin finibus, massa quis pretium tempor, mi magna pretium tortor, eget condimentum orci urna facilisis est. Integer consectetur blandit lectus ut pharetra. Aenean dignissim, ante sed volutpat vehicula, turpis leo maximus sem, quis laoreet ante felis at neque. Curabitur eget lorem sit amet elit bibendum tincidunt eu at sapien. Duis ac lectus finibus, pulvinar ante at, convallis justo. Pellentesque a nisl sit amet felis posuere consequat. Aenean imperdiet commodo lectus at suscipit. Nullam id nunc nisi.
+
+Fusce lacus quam, elementum eu sagittis ut, mattis nec orci. Maecenas pretium mauris arcu, id commodo orci porta a. Duis non pretium ante. Pellentesque pulvinar nisi quis turpis eleifend, ac pretium leo vulputate. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Duis commodo tempus tristique. Curabitur lorem sapien, vehicula eu nunc sit amet, porta lacinia sapien. Donec in aliquet sapien, non venenatis enim. Mauris luctus erat eu malesuada laoreet. Duis vel erat dui. Vivamus lectus mi, hendrerit eu rhoncus ut, semper eu dolor. Curabitur eleifend lectus diam, ultricies faucibus lectus vulputate vel. In egestas tortor sed risus consequat, at elementum arcu accumsan. Cras id tempus ex. Donec non mi ut nunc rhoncus dignissim vitae eu turpis. Integer a eros sed velit sodales ornare.
+
+Proin malesuada tincidunt orci eget sagittis. Duis ullamcorper iaculis erat ac pulvinar. Mauris feugiat luctus placerat. Phasellus euismod tempor sagittis. Sed sed nunc pulvinar, dignissim dolor ut, aliquam metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla tristique metus eget dictum elementum.
+
+Vestibulum lacus nunc, sagittis sed feugiat ac, mollis id tortor. Maecenas pellentesque, diam non lobortis ornare, elit ipsum blandit mi, eu egestas mauris enim quis mi. Maecenas at tincidunt nisi. Nam mattis mauris vitae nisl lacinia egestas. Ut euismod mi eget facilisis varius. Sed tincidunt, quam aliquet semper faucibus, ante enim porttitor nulla, accumsan volutpat sapien magna in enim. Proin eu rutrum elit.`
+
 const mainStyle = {
-  width: 200,      
+  width: 200,
   padding: 10,
   background: '#111',
   color: '#fff',
@@ -32,7 +43,7 @@ const mainStyle = {
   textAlign: 'center',
 }
 const lateralStyle = {
-  width: 200,      
+  width: 200,
   padding: 8,
   background: '#fff',
   color: '#0e0e0ee5',
@@ -40,10 +51,10 @@ const lateralStyle = {
   textAlign: 'center',
 }
 
-const CustomNode = ({ data }) => {
+function CustomNode({ data }) {
   const style = data.isMain ? mainStyle : lateralStyle
   return (
-    <div style={{ position:'relative', ...style }}>
+    <div style={{ position: 'relative', ...style }}>
       {data.handles.map(h => (
         <Handle
           key={h.id}
@@ -53,14 +64,18 @@ const CustomNode = ({ data }) => {
           style={h.style}
         />
       ))}
-      <div style={{ whiteSpace:'pre-wrap' }} className="flex items-center justify-between">
-        <span className={`h-8 w-8 min-w-8 rounded-full mr-2 ${
-          data.done ? 'bg-green-500' : 'bg-gray-500'
-        }`} />
+      <div style={{ whiteSpace: 'pre-wrap' }} className="flex items-center justify-between">
+        <span
+          className={`h-8 w-8 min-w-8 rounded-full mr-2 ${
+            data.done ? 'bg-green-500' : 'bg-gray-500'
+          }`}
+        />
         <div className="flex-1 flex justify-center font-semibold">
-            <div className="whitespace-pre-wrap text-center">
-                {data.label}
-            </div>
+          <div className="whitespace-pre-wrap text-center">
+            {data.label}
+            <br />
+            {data.xp} XP
+          </div>
         </div>
       </div>
     </div>
@@ -71,11 +86,15 @@ const nodeTypes = { custom: CustomNode }
 
 const nodesInit = [
   {
-    id: 'n1', type: 'custom',
+    id: 'n1',
+    type: 'custom',
     position: { x: mainX, y: verticalGap * 1 },
     data: {
-      label: 'Versionamento\n 10/10 xp',
-      isMain: true, done: false,
+      label: 'Versionamento',
+      xp: 10,
+      description: loremIpsum,
+      isMain: true,
+      done: false,
       handles: [
         { id: 'n1-b', type: 'source', position: Position.Bottom },
         { id: 'n1-r', type: 'source', position: Position.Right },
@@ -83,11 +102,15 @@ const nodesInit = [
     },
   },
   {
-    id: 'n2', type: 'custom',
+    id: 'n2',
+    type: 'custom',
     position: { x: mainX, y: verticalGap * 2 },
     data: {
-      label: 'Operações básicas\n10/10 xp',
-      isMain: true, done: false,
+      label: 'Operações básicas',
+      xp: 10,
+      description: loremIpsum,
+      isMain: true,
+      done: false,
       handles: [
         { id: 'n2-t', type: 'target', position: Position.Top },
         { id: 'n2-b', type: 'source', position: Position.Bottom },
@@ -97,11 +120,15 @@ const nodesInit = [
     },
   },
   {
-    id: 'n3', type: 'custom',
+    id: 'n3',
+    type: 'custom',
     position: { x: mainX, y: verticalGap * 3 },
     data: {
-      label: 'Fluxo de controle\n0/10 xp',
-      isMain: true, done: false,
+      label: 'Fluxo de controle',
+      xp: 10,
+      description: loremIpsum,
+      isMain: true,
+      done: false,
       handles: [
         { id: 'n3-t', type: 'target', position: Position.Top },
         { id: 'n3-r1', type: 'source', position: Position.Right, style: { top: '35%' } },
@@ -109,109 +136,135 @@ const nodesInit = [
       ],
     },
   },
-
   {
-    id: 'm1', type: 'custom',
-    position: { x: leftX, y: verticalGap*2 - 50 },
+    id: 'm1',
+    type: 'custom',
+    position: { x: leftX, y: verticalGap * 2 - 50 },
     data: {
-      label: 'Operadores aritméticos\n5 xp',
-      isMain: false, done: false,
+      label: 'Operadores aritméticos',
+      xp: 5,
+      description: loremIpsum,
+      isMain: false,
+      done: false,
       handles: [{ id: 'm1-r', type: 'target', position: Position.Right }],
     },
   },
   {
-    id: 'm2', type: 'custom',
-    position: { x: leftX, y: verticalGap*2 + 50 },
+    id: 'm2',
+    type: 'custom',
+    position: { x: leftX, y: verticalGap * 2 + 50 },
     data: {
-      label: 'Operadores lógicos\n5 xp',
-      isMain: false, done: false,
+      label: 'Operadores lógicos',
+      xp: 5,
+      description: loremIpsum,
+      isMain: false,
+      done: false,
       handles: [{ id: 'm2-r', type: 'target', position: Position.Right }],
     },
   },
-
   {
-    id: 'm3', type: 'custom',
-    position: { x: rightX, y: verticalGap*1 },
+    id: 'm3',
+    type: 'custom',
+    position: { x: rightX, y: verticalGap * 1 },
     data: {
-      label: 'Git\n 5 xp',
-      isMain: false, done: false,
+      label: 'Git',
+      xp: 5,
+      description: loremIpsum,
+      isMain: false,
+      done: false,
       handles: [{ id: 'm3-l', type: 'target', position: Position.Left }],
     },
   },
   {
-    id: 'm4', type: 'custom',
-    position: { x: rightX, y: verticalGap*3 - 50 },
+    id: 'm4',
+    type: 'custom',
+    position: { x: rightX, y: verticalGap * 3 - 50 },
     data: {
-      label: 'If-Else/Switch\n 5 xp',
-      isMain: false, done: false,
+      label: 'If-Else/Switch',
+      xp: 5,
+      description: loremIpsum,
+      isMain: false,
+      done: false,
       handles: [{ id: 'm4-l', type: 'target', position: Position.Left }],
     },
   },
   {
-    id: 'm5', type: 'custom',
-    position: { x: rightX, y: verticalGap*3 + 50 },
+    id: 'm5',
+    type: 'custom',
+    position: { x: rightX, y: verticalGap * 3 + 50 },
     data: {
-      label: 'For/While/Do-While\n5 xp',
-      isMain: false, done: false,
+      label: 'For/While/Do-While',
+      xp: 5,
+      description: loremIpsum,
+      isMain: false,
+      done: false,
       handles: [{ id: 'm5-l', type: 'target', position: Position.Left }],
     },
   },
 ]
 
 const edgesInit = [
-  { id:'e1-2', source:'n1', sourceHandle:'n1-b', target:'n2', targetHandle:'n2-t', style:{stroke:'#888'} },
-  { id:'e2-3', source:'n2', sourceHandle:'n2-b', target:'n3', targetHandle:'n3-t', style:{stroke:'#888'} },
-  { id:'e2-m1', source:'n2', sourceHandle:'n2-l1', target:'m1', targetHandle:'m1-r', style:{strokeDasharray:'4 2', stroke:'#888'} },
-  { id:'e2-m2', source:'n2', sourceHandle:'n2-l2', target:'m2', targetHandle:'m2-r', style:{strokeDasharray:'4 2', stroke:'#888'} },
-  { id:'e1-m3', source:'n1', sourceHandle:'n1-r', target:'m3', targetHandle:'m3-l', style:{strokeDasharray:'4 2', stroke:'#888'} },
-  { id:'e3-m4', source:'n3', sourceHandle:'n3-r1', target:'m4', targetHandle:'m4-l', style:{strokeDasharray:'4 2', stroke:'#888'} },
-  { id:'e3-m5', source:'n3', sourceHandle:'n3-r2', target:'m5', targetHandle:'m5-l', style:{strokeDasharray:'4 2', stroke:'#888'} },
+  { id: 'e1-2', source: 'n1', sourceHandle: 'n1-b', target: 'n2', targetHandle: 'n2-t', style: { stroke: '#888' } },
+  { id: 'e2-3', source: 'n2', sourceHandle: 'n2-b', target: 'n3', targetHandle: 'n3-t', style: { stroke: '#888' } },
+  { id: 'e2-m1', source: 'n2', sourceHandle: 'n2-l1', target: 'm1', targetHandle: 'm1-r', style: { strokeDasharray: '4 2', stroke: '#888' } },
+  { id: 'e2-m2', source: 'n2', sourceHandle: 'n2-l2', target: 'm2', targetHandle: 'm2-r', style: { strokeDasharray: '4 2', stroke: '#888' } },
+  { id: 'e1-m3', source: 'n1', sourceHandle: 'n1-r', target: 'm3', targetHandle: 'm3-l', style: { strokeDasharray: '4 2', stroke: '#888' } },
+  { id: 'e3-m4', source: 'n3', sourceHandle: 'n3-r1', target: 'm4', targetHandle: 'm4-l', style: { strokeDasharray: '4 2', stroke: '#888' } },
+  { id: 'e3-m5', source: 'n3', sourceHandle: 'n3-r2', target: 'm5', targetHandle: 'm5-l', style: { strokeDasharray: '4 2', stroke: '#888' } },
 ]
-export default function Trilha() {
-    const [nodes, setNodes, onNodesChange] = useNodesState(nodesInit)
-    const [edges, , onEdgesChange] = useEdgesState(edgesInit)
-    const [started, setStarted] = React.useState(false)
-    const onNodeClick = useCallback((_, node) => {
-        setNodes(ns =>
-        ns.map(n =>
-            n.id === node.id
-            ? {
-                ...n,
-                data: { ...n.data, done: !n.data.done },
-                }
-            : n
-        )
-        )
-    }, [setNodes])
 
-    const onInit = useCallback(flow => {
+export default function Trilha() {
+  const [nodes, setNodes, onNodesChange] = useNodesState(nodesInit)
+  const [edges, , onEdgesChange] = useEdgesState(edgesInit)
+  const [started, setStarted] = useState(false)
+  const [selectedNode, setSelectedNode] = useState(null)
+
+  const onNodeClick = useCallback((_, node) => {
+    setSelectedNode(node)
+  }, [])
+
+  const toggleDone = useCallback((id) => {
+    setNodes(ns =>
+      ns.map(n => {
+        if (n.id !== id) return n;
+        if (n.data.isMain) return n;
+        return { ...n, data: { ...n.data, done: !n.data.done } };
+      })
+    );
+    setSelectedNode(sel =>
+      sel && sel.id === id && !sel.data.isMain
+        ? { ...sel, data: { ...sel.data, done: !sel.data.done } }
+        : sel
+    );
+  }, [setNodes, setSelectedNode]);
+
+  const onInit = useCallback(flow => {
     const zoom = 1.3
     const yOffset = -100
     const xOffset = -200
     const { x: nx, y: ny } = nodesInit[0].position
-
     const vw = window.innerWidth
     const vh = window.innerHeight
-
     const panX = vw / 2 - (nx - xOffset) * zoom
     const panY = vh / 2 - (ny - yOffset) * zoom
-
     flow.setViewport({ x: panX, y: panY, zoom })
-    }, [])
+  }, [])
 
   return (
     <div className="relative w-full h-screen bg-[#0e0e0e]">
-      <div className=" px-28 z-50 absolute top-0 left-0 w-full flex items-center justify-between p-4 bg-[#0e0e0e] bg-opacity-80">
+      <div className="px-28 z-50 absolute top-0 left-0 w-full flex items-center justify-between p-4 bg-[#0e0e0e] bg-opacity-80">
         <button
           onClick={() => history.back()}
-          className="flex items-center gap-2 px-4 py-2 bg-[#E4E4E4] text-gray-700 font-semibold rounded-full hover:bg-gray-100 transition-colors duration-200">
+          className="flex items-center gap-2 px-4 py-2 bg-[#e4e4e4] text-gray-700 font-semibold rounded-full hover:bg-gray-100 transition-colors duration-200"
+        >
           <ArrowLeftIcon className="w-5 h-5" />
-          Voltar
+          voltar
         </button>
         <div className="text-center text-white">
-          <h1 className="text-4xl font-semibold text-white/90">C++: Avançado</h1>
+          <h1 className="text-4xl font-semibold text-white/90">c++: avançado</h1>
           <p className="text-lg font-semibold">
-            <span className='text-[#E4E4E4]'>{gainedXp}/</span><span className='text-green-600'>{totalXp} XP</span>
+            <span className="text-[#e4e4e4]">{gainedXp}/</span>
+            <span className="text-green-600">{totalXp} xp</span>
           </p>
         </div>
         <div className="w-30 h-30 flex flex-col items-center mt-6">
@@ -236,40 +289,45 @@ export default function Trilha() {
               transform={`rotate(-90 ${size/2} ${size/2})`}
             />
           </svg>
-          <div className="text-green-600 font-semibold text-lg">
-            30%
-            </div>
+          <div className="text-green-600 font-semibold text-lg">30%</div>
         </div>
       </div>
 
       <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      nodeTypes={nodeTypes}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onNodeClick={onNodeClick}
-      onInit={onInit}
-      fitView={false}
-      nodesDraggable={false}
-      nodesConnectable={false}
-      elementsSelectable={false}
-      panOnDrag={true}
-      zoomOnScroll={true}
-    >
-      <Controls showInteractive={false} />
-    </ReactFlow>
-    {!started && (
-        <div
-          className="absolute inset-0 z-20 bg-gradient-to-t from-black to-transparent flex items-center justify-center"
-        >
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onNodeClick={onNodeClick}
+        onInit={onInit}
+        fitView={false}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={false}
+        panOnDrag
+        zoomOnScroll
+      >
+        <Controls showInteractive={false} />
+      </ReactFlow>
+
+      {!started && (
+        <div className="absolute inset-0 z-20 bg-gradient-to-t from-black to-transparent flex items-center justify-center">
           <button
             onClick={() => setStarted(true)}
-            className="px-40 absolute bottom-20 py-3 bg-[#E4E4E4] text-[#0e0e0e] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-colors duration-200"
+            className="px-40 absolute bottom-20 py-3 bg-[#e4e4e4] text-[#0e0e0e] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-colors duration-200"
           >
-            Iniciar Trilha
+            iniciar trilha
           </button>
         </div>
+      )}
+
+      {selectedNode && (
+        <TrackDrawer
+          node={selectedNode}
+          onClose={() => setSelectedNode(null)}
+          onToggleDone={toggleDone}
+        />
       )}
     </div>
   )
