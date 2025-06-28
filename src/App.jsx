@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import Home from './pages/Home'
 import Trilha from './pages/Trilha'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import UserProfile from './pages/UserProfile'
 import { store } from './store'
 import UserDrawer from './components/UserDrawer'
 
@@ -16,6 +19,9 @@ export default function App() {
           <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
             <Routes>
               <Route path="/trilha" element={<Trilha />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<Register />} />
+              <Route path="/perfil" element={<UserProfile />} />
               <Route path="/" element={<Home />} />
             </Routes>
           </div>
