@@ -131,7 +131,7 @@
             fetchCategorias();
 
             if (id) {
-                fetch(`http://localhost:8080/api/trilhas/${id}`)
+                fetch(`http://localhost:8080/trilha/${id}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Erro ao buscar trilha');
                         return response.json();
@@ -173,7 +173,7 @@
 
         async function fetchCategorias() {
             try {
-                const response = await fetch('http://localhost:8080/api/categorias');
+                const response = await fetch('http://localhost:8080/trilha/categorias');
                 if (!response.ok) throw new Error('Erro ao buscar categorias');
                 const categorias = await response.json();
                 const select = document.getElementById('categoria');
@@ -289,7 +289,7 @@
                 modulos: modulosJSON
             };
 
-            let url = 'http://localhost:8080/api/trilhas';
+            let url = 'http://localhost:8080/trilha';
             let metodo = 'POST';
 
             if (id) {

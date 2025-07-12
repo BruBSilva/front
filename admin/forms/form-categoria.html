@@ -23,7 +23,7 @@
         const id = params.get("id");
         document.addEventListener("DOMContentLoaded", function() {
             if (id) {
-                fetch('http://localhost:8080/api/categorias/' + id)
+                fetch('http://localhost:8080/trilha/categorias/' + id)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error("Erro ao buscar categoria");
@@ -52,7 +52,7 @@
                 descricao: descricao
             };
 
-            let url = 'http://localhost:8080/api/categorias';
+            let url = 'http://localhost:8080/trilha/categorias';
             let metodo = 'POST';
 
             if (id) {
