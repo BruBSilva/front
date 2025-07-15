@@ -1,15 +1,24 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import TrackCard from '../components/TrackCard'
 import ActionsBar from '../components/ActionsBar'
 import { useNavigate } from 'react-router-dom'
+import { getTrilhas } from '../services/trilhaApi'
 
 export default function Home() {
   const navigate = useNavigate()
-  const cards = [
-    { language:'C#', level:'Iniciante', status:'Em andamento', xp:100, xpGain:30, progress:30 },
-    { language:'C++', level:'Avançado', status:'Iniciado',    xp:400, xpGain:80, progress:20, onAction:()=>{navigate(`/trilha`)} },
-    { language:'C++', level:'Iniciante', status:'Completo',    xp:100, xpGain:100, progress:100 }
-  ]
+  const [trilhas, setTrilhas] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    getTrilhas()
+      .then(res => setTrilhas(Array.isArray(res.data.content) ? res.data.content : []))
+      .catch(() => setError('Erro ao carregar trilhas'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div className="text-white p-8">Carregando trilhas...</div>
+  if (error) return <div className="text-red-500 p-8">{error}</div>
 
   return (
     <div className=" min-w-screen bg-[#0e0e0e] text-white">
@@ -23,12 +32,22 @@ export default function Home() {
         <hr className="border-t border-green-600/50 w-[97%] mx-auto mt-6" />
       </div>
       <ActionsBar 
-      onAdd={() => {}} 
-      onFilter={() => {}} 
-      onSort={() => {}} />
+        onAdd={() => {}} 
+        onFilter={() => {}} 
+        onSort={() => {}} 
+      />
       <div className="grid gap-6 p-6 transition-all duration-300 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-        {cards.map((c, i) => (
-          <TrackCard key={i} {...c} />
+        {trilhas.map((trilha) => (
+          <TrackCard
+            key={trilha.id}
+            language={trilha.linguagem || trilha.nome}
+            level={trilha.nivel || trilha.level || ''}
+            status={trilha.status || 'Em andamento'}
+            xp={trilha.xp || 0}
+            xpGain={trilha.xpGanho || 0}
+            progress={trilha.progresso || 0}
+            onAction={() => navigate(`/trilha?id=${trilha.id}`)}
+          />
         ))}
       </div>
     </div>

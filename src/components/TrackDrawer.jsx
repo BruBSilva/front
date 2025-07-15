@@ -16,14 +16,23 @@ export default function TrackDrawer({ node, onClose, onToggleDone }) {
         </button>
         <button
           onClick={() => onToggleDone(node.id)}
-          className="flex items-center bg-white py-2 px-3 rounded-xl shadow-lg hover:bg-gray-100 transition-colors duration-300"
+          className={`flex items-center py-2 px-3 rounded-xl shadow-lg transition-colors duration-300 ${
+            node.data.done ? 'bg-green-500 text-white' : 
+            node.data.isCurrent ? 'bg-blue-500 text-white hover:bg-blue-600' : 
+            'bg-gray-400 text-gray-700 cursor-not-allowed'
+          }`}
+          disabled={!node.data.isCurrent}
         >
           <span
             className={`h-3 w-3 rounded-full mr-2 ${
-              node.data.done ? 'bg-green-500' : 'bg-gray-500'
+              node.data.done ? 'bg-green-300' : 
+              node.data.isCurrent ? 'bg-blue-300' : 
+              'bg-gray-300'
             }`}
           />
-          {node.data.done ? 'Concluido' : 'Estudando'}
+          {node.data.done ? 'Concluído' : 
+           node.data.isCurrent ? 'Concluir Módulo' : 
+           'Bloqueado'}
         </button>
       </div>
 
