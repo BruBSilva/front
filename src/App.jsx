@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Trilha from './pages/Trilha'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import UserProfile from './pages/UserProfile'
+import { store } from './store'
 import UserDrawer from './components/UserDrawer'
 import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './hooks/useAuth'
@@ -28,15 +32,18 @@ function AppContent() {
   const activeUser = user || defaultUser
 
   return (
-    <Router>
-      <div className="flex min-h-screen">
-        <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
-          <Routes>
-            <Route path="/trilha" element={<Trilha activeUser={activeUser} />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/populate" element={<React.Suspense fallback={<div>Carregando...</div>}><PopulatePage /></React.Suspense>} />
-          </Routes>
-        </div>
+    <Provider store={store}>
+      <Router>
+        <div className="flex min-h-screen">
+          <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
+            <Routes>
+              <Route path="/trilha" element={<Trilha />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<Register />} />
+              <Route path="/perfil" element={<UserProfile />} />
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </div>
 
         {drawerOpen && (
           <div className="fixed top-0 right-0 h-screen w-96 z-50">

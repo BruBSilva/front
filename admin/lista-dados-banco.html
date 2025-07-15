@@ -78,7 +78,7 @@
 
         async function fetchConquistas() {
             try {
-                const response = await fetch('http://localhost:8080/api/conquistas');
+                const response = await fetch('http://localhost:8080/trilha/conquistas');
                 if (!response.ok) throw new Error('Erro ao buscar conquistas');
                 
                 const conquistas = await response.json();
@@ -102,7 +102,7 @@
 
         async function fetchCategorias() {
             try {
-                const response = await fetch('http://localhost:8080/api/categorias');
+                const response = await fetch('http://localhost:8080/trilha/categorias');
                 if (!response.ok) throw new Error('Erro ao buscar categorias');
                 
                 const categorias = await response.json();
@@ -126,7 +126,7 @@
 
         async function fetchTrilhas() {
             try {
-                const response = await fetch('http://localhost:8080/api/trilhas');
+                const response = await fetch('http://localhost:8080/trilha');
                 if (!response.ok) throw new Error('Erro ao buscar trilhas');
                 
                 const trilhas = await response.json();
@@ -161,7 +161,7 @@
 
         function removerCategoria(id){
             if (confirm('Tem certeza que deseja excluir esta categoria?')) {
-                fetch(`http://localhost:8080/api/categorias/${id}`, {
+                fetch(`http://localhost:8080/trilha/categorias/${id}`, {
                     method: 'DELETE'
                 })
                 .then(response => {
@@ -178,7 +178,7 @@
 
         function removerTrilha(id){
             if (confirm('Tem certeza que deseja excluir esta trilha?')) {
-                fetch(`http://localhost:8080/api/trilhas/${id}`, {
+                fetch(`http://localhost:8080/trilha/${id}`, {
                     method: 'DELETE'
                 })
                 .then(response => {
