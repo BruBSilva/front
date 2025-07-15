@@ -5,7 +5,6 @@ import Trilha from './pages/Trilha'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import UserProfile from './pages/UserProfile'
-import { store } from './store'
 import UserDrawer from './components/UserDrawer'
 import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './hooks/useAuth'
@@ -32,15 +31,15 @@ function AppContent() {
   const activeUser = user || defaultUser
 
   return (
-    <Provider store={store}>
       <Router>
         <div className="flex min-h-screen">
           <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
             <Routes>
-              <Route path="/trilha" element={<Trilha />} />
+              <Route path="/trilha" element={<Trilha activeUser={activeUser} />} />
               <Route path="/login" element={<Login />} />
               <Route path="/cadastro" element={<Register />} />
               <Route path="/perfil" element={<UserProfile />} />
+              <Route path="/populate" element={<PopulatePage />} />
               <Route path="/" element={<Home />} />
             </Routes>
           </div>
