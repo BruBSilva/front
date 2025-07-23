@@ -3,11 +3,16 @@ import TrackCard from '../components/TrackCard'
 import ActionsBar from '../components/ActionsBar'
 import { useNavigate } from 'react-router-dom'
 import { getTrilhas } from '../services/trilhaApi'
+import { getProgresso } from '../services/learningApi'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Home() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [trilhas, setTrilhas] = useState([])
+  const [trilhasWithProgress, setTrilhasWithProgress] = useState([])
   const [loading, setLoading] = useState(true)
+  const [progressLoading, setProgressLoading] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -17,8 +22,92 @@ export default function Home() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Fetch progress for each trilha when user and trilhas are available
+  useEffect(() => {
+    if (!user?.id || trilhas.length === 0) {
+      setTrilhasWithProgress(trilhas.map(trilha => ({
+        ...trilha,
+        status: 'Não iniciado',
+        progress: 0,
+        xpGain: 0,
+        userProgress: null
+      })))
+      return
+    }
+
+    const fetchProgressForTrilhas = async () => {
+      setProgressLoading(true)
+      const trilhasWithProgressData = await Promise.all(
+        trilhas.map(async (trilha) => {
+          try {
+            const progressResponse = await getProgresso(user.id, trilha.id)
+            const progress = progressResponse.data
+            
+            // Calculate total possible XP from progress data
+            // The total XP should be at least the XP already gained
+            // For now, we'll use the XP gained as a reference and assume it's complete if 100%
+            let totalPossibleXP = progress.xpGanho || 0
+            if (progress.percentual > 0 && progress.percentual < 100) {
+              // Calculate total based on percentage: if user has X XP at Y%, total = X / (Y/100)
+              totalPossibleXP = Math.round((progress.xpGanho || 0) / (progress.percentual / 100))
+            } else if (progress.percentual === 100) {
+              // If 100% complete, xpGanho IS the total
+              totalPossibleXP = progress.xpGanho || 0
+            } else if (progress.percentual === 0) {
+              // If 0% complete, we need to estimate or use a default
+              totalPossibleXP = 100 // Default estimate
+            }
+            
+            // Determine status based on progress
+            let status = 'Em andamento'
+            if (progress.statusProgresso === 'CONCLUIDO') {
+              status = 'Completo'
+            } else if (progress.percentual === 0) {
+              status = 'Iniciado'
+            }
+
+            return {
+              ...trilha,
+              status,
+              progress: Math.round(progress.percentual || 0),
+              xp: totalPossibleXP,
+              xpGain: progress.xpGanho || 0,
+              userProgress: progress
+            }
+          } catch {
+            // No progress found - trilha not started
+            // Use a reasonable default for total XP
+            const totalPossibleXP = 100 // Default estimate for unstarted trilhas
+              
+            return {
+              ...trilha,
+              status: 'Não iniciado',
+              progress: 0,
+              xp: totalPossibleXP,
+              xpGain: 0,
+              userProgress: null
+            }
+          }
+        })
+      )
+      
+      setTrilhasWithProgress(trilhasWithProgressData)
+      setProgressLoading(false)
+    }
+
+    fetchProgressForTrilhas()
+  }, [user, trilhas])
+
   if (loading) return <div className="text-white p-8">Carregando trilhas...</div>
   if (error) return <div className="text-red-500 p-8">{error}</div>
+
+  const displayTrilhas = trilhasWithProgress.length > 0 ? trilhasWithProgress : trilhas.map(trilha => ({
+    ...trilha,
+    status: 'Carregando...',
+    progress: 0,
+    xp: 100,
+    xpGain: 0
+  }))
 
   return (
     <div className=" min-w-screen bg-[#0e0e0e] text-white">
@@ -37,15 +126,15 @@ export default function Home() {
         onSort={() => {}} 
       />
       <div className="grid gap-6 p-6 transition-all duration-300 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-        {trilhas.map((trilha) => (
+        {displayTrilhas.map((trilha) => (
           <TrackCard
             key={trilha.id}
             language={trilha.linguagem || trilha.nome}
             level={trilha.nivel || trilha.level || ''}
-            status={trilha.status || 'Em andamento'}
-            xp={trilha.xp || 0}
-            xpGain={trilha.xpGanho || 0}
-            progress={trilha.progresso || 0}
+            status={trilha.status}
+            xp={trilha.xp}
+            xpGain={trilha.xpGain}
+            progress={trilha.progress}
             onAction={() => navigate(`/trilha?id=${trilha.id}`)}
           />
         ))}

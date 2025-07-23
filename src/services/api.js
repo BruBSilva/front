@@ -18,34 +18,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor de resposta para refresh automático
+// Interceptor de resposta - simplificado pois não temos refresh ainda
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-    if (
-      error.response &&
-      error.response.status === 401 &&
-      !originalRequest._retry
-    ) {
-      originalRequest._retry = true;
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const res = await api.post('/auth/api/refresh', { refreshToken });
-        const newToken = res.data.accessToken;
-        localStorage.setItem('accessToken', newToken);
-        api.defaults.headers['Authorization'] = `Bearer ${newToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Redirecionar para login ou limpar tokens
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
+    if (error.response && error.response.status === 401) {
+      // Se receber 401, redirecionar para login
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
-    // Tratamento centralizado de erros
     return Promise.reject(error);
   }
 );

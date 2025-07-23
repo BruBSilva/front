@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
-import { createAluno, deleteUsuario, getAlunos } from '../services/userApi';
-import { createTrilha, deleteTrilha, getTrilhas } from '../services/trilhaApi';
-import { createProgresso } from '../services/learningApi';
-import { createUserConquista } from '../services/learningApi';
+import { 
+  setupPopulateAuth, 
+  createAluno, 
+  deleteUsuario, 
+  getAlunos,
+  createTrilha, 
+  deleteTrilha, 
+  getTrilhas,
+  getCategorias,
+  createCategoria,
+  createProgresso,
+  createUserConquista,
+  createAdmin,
+  checkAdminExists
+} from '../services/adminApi';
 
 
 
@@ -12,6 +23,39 @@ export default function PopulatePage() {
   const handleResetAndPopulate = async () => {
     let log = [];
     try {
+      // Primeiro verificar se admin já existe
+      console.log('Verificando se admin já existe...');
+      log.push('Verificando se admin já existe...');
+      
+      const adminExists = await checkAdminExists('admin@teste.com');
+      
+      if (!adminExists) {
+        console.log('Criando usuário admin para operações...');
+        log.push('Criando usuário admin para operações...');
+        try {
+          await createAdmin({
+            nome: 'Admin Teste',
+            email: 'admin@teste.com',
+            senha: 'admin123'
+          });
+          console.log('Admin criado com sucesso');
+          log.push('Admin criado com sucesso');
+        } catch (adminError) {
+          console.log('Erro ao criar admin:', adminError.message);
+          log.push('Erro ao criar admin: ' + adminError.message);
+        }
+      } else {
+        console.log('Admin já existe, prosseguindo...');
+        log.push('Admin já existe, prosseguindo...');
+      }
+
+      // Agora tentar configurar autenticação
+      console.log('Configurando autenticação...');
+      log.push('Configurando autenticação...');
+      await setupPopulateAuth(); // Não falha se não conseguir autenticar
+      console.log('Configuração concluída');
+      log.push('Configuração concluída');
+
       // Apaga usuário pelo email se existir
       try {
         const alunos = await getAlunos();
@@ -66,11 +110,11 @@ export default function PopulatePage() {
       let categoriaId;
       try {
         // Verifica se já existe
-        const categoriasResp = await import('../services/trilhaApi').then(m => m.getCategorias());
+        const categoriasResp = await getCategorias();
         const categoriasArr = Array.isArray(categoriasResp.data.content) ? categoriasResp.data.content : [];
         let categoria = categoriasArr.find(c => c.nome === 'Categoria Teste');
         if (!categoria) {
-          const novaCatResp = await import('../services/trilhaApi').then(m => m.createCategoria({ nome: 'Categoria Teste', descricao: 'Categoria para testes automáticos' }));
+          const novaCatResp = await createCategoria({ nome: 'Categoria Teste', descricao: 'Categoria para testes automáticos' });
           categoria = novaCatResp.data;
           log.push('Categoria criada: ' + JSON.stringify(categoria));
         } else {

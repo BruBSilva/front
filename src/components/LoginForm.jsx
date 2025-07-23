@@ -1,55 +1,80 @@
 import React, { useState } from 'react';
-import { login } from '../services/authApi';
+import { useAuth } from '../hooks/useAuth';
 
 export default function LoginForm({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setLoading(true);
     setError(null);
+    
+    console.log('Iniciando processo de login...');
+    console.log('Email:', email);
+    
     try {
-      const res = await login({ email, password });
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
-      onLogin && onLogin(res.data.user);
+      const userData = await login({ email, password });
+      console.log('Login bem-sucedido:', userData);
+      onLogin && onLogin(userData);
     } catch (err) {
-      setError('Usuário ou senha inválidos');
+      console.error('Erro detalhado no login:', err);
+      console.error('Response:', err.response);
+      console.error('Status:', err.response?.status);
+      console.error('Data:', err.response?.data);
+      
+      if (err.response && err.response.status === 401) {
+        setError('E-mail ou senha inválidos');
+      } else if (err.response && err.response.status === 404) {
+        setError('Usuário não encontrado');
+      } else {
+        setError('Erro no servidor. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-sm mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
-      <input
-        type="email"
-        placeholder="E-mail"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        className="block w-full mb-2 border p-2 rounded"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        className="block w-full mb-2 border p-2 rounded"
-        required
-      />
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-        disabled={loading}
-      >
-        {loading ? 'Entrando...' : 'Entrar'}
-      </button>
-    </form>
+    <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <input
+            type="email"
+            placeholder="E-mail"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+            required
+          />
+        </div>
+        <div>
+          <input
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+            required
+          />
+        </div>
+        {error && (
+          <div className="text-red-400 text-sm text-center bg-red-900/20 p-3 rounded-lg border border-red-800">
+            {error}
+          </div>
+        )}
+        <button
+          type="submit"
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={loading}
+        >
+          {loading ? 'Entrando...' : 'Entrar'}
+        </button>
+      </form>
+    </div>
   );
 }
