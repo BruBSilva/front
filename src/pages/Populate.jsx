@@ -52,7 +52,7 @@ export default function PopulatePage() {
       // Agora tentar configurar autenticação
       console.log('Configurando autenticação...');
       log.push('Configurando autenticação...');
-      await setupPopulateAuth(); // Não falha se não conseguir autenticar
+      await setupPopulateAuth();
       console.log('Configuração concluída');
       log.push('Configuração concluída');
 

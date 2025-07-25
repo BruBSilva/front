@@ -3,10 +3,9 @@ import axios from 'axios';
 // Instância central do Axios
 const api = axios.create({
   baseURL: 'http://localhost:8080',
-  withCredentials: true, // se precisar enviar cookies
+  withCredentials: true,
 });
 
-// Interceptor para incluir JWT
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -18,7 +17,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor de resposta - simplificado pois não temos refresh ainda
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

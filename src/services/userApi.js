@@ -17,6 +17,5 @@ export const getUsuarioById = (id) => api.get(`/usuario/aluno/${id}`);
 export const deleteUsuario = (id) => api.delete(`/usuario/aluno/${id}`);
 export const updateUsuario = (id, data) => api.put(`/usuario/aluno/${id}`, data);
 
-// Função para buscar usuário por email (usado no auth)
 export const getAlunoByEmail = (email) => api.get(`/usuario/aluno/email/${email}`);
 export const getAdminByEmail = (email) => api.get(`/usuario/admin/email/${email}`);

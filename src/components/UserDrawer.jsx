@@ -14,25 +14,19 @@ export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
 
   const usuarioId = propUsuarioId || user?.id
 
-  // Effect to load user data if not complete
   useEffect(() => {
     const loadUserData = async () => {
-      console.log('UserDrawer - Current user data:', user)
       if (user && user.id && (!user.nome || user.xpTotal === undefined)) {
-        console.log('UserDrawer - Loading complete user data for ID:', user.id)
         setUserDataLoading(true)
         try {
           const response = await getUsuarioById(user.id)
-          console.log('UserDrawer - Fetched complete user data:', response.data)
           setUserData(response.data)
-        } catch (error) {
-          console.error('Error fetching complete user data:', error)
-          setUserData(user) // fallback to original user data
+        } catch  {
+          setUserData(user)
         } finally {
           setUserDataLoading(false)
         }
       } else {
-        console.log('UserDrawer - Using existing user data')
         setUserData(user)
       }
     }
@@ -44,14 +38,10 @@ export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
   }, [user])
 
   useEffect(() => {
-    console.log('UserDrawer - Fetching conquistas for usuarioId:', usuarioId)
     if (usuarioId) {
       getUserConquistas(usuarioId)
         .then(res => {
-          console.log('UserDrawer - Conquistas response:', res.data)
-          // A API retorna uma estrutura de paginação, extrair o conteúdo
           const conquistasData = res.data?.content || []
-          console.log('UserDrawer - Conquistas data:', conquistasData)
           setConquistas(conquistasData)
         })
         .catch(error => {
@@ -64,7 +54,6 @@ export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
     }
   }, [usuarioId])
 
-  // Function to refresh conquistas
   const refreshConquistas = useCallback(() => {
     if (usuarioId) {
       getUserConquistas(usuarioId)
@@ -72,13 +61,10 @@ export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
           const conquistasData = res.data?.content || []
           setConquistas(conquistasData)
         })
-        .catch(error => {
-          console.error('Error refreshing conquistas:', error)
-        })
+        .catch()
     }
   }, [usuarioId])
 
-  // Listen for conquista updates (you can trigger this from other components)
   useEffect(() => {
     const handleConquistaUpdate = () => {
       refreshConquistas()

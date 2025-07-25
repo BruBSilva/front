@@ -58,7 +58,6 @@ export default function Register() {
 
       console.log('Usuário criado com sucesso:', result)
 
-      // Redirecionar para login após sucesso
       navigate('/login', { 
         state: { 
           message: 'Cadastro realizado com sucesso! Faça login para continuar.' 

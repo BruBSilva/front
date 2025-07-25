@@ -1,16 +1,14 @@
 import axios from 'axios';
 
-// Instância separada para operações administrativas (populate)
 const adminApi = axios.create({
   baseURL: 'http://localhost:8080',
   withCredentials: true,
 });
 
-// Para operações de populate, primeiro tentamos sem autenticação
-// Se falhar, tentamos com usuário teste
 let populateToken = null;
 
-// Função para configurar autenticação se necessário
+// CÓDIGO USADO APENAS PARA POPULATE INICIAL (DEBUG, NÃO É CODIGO FINAL)
+
 export const setupPopulateAuth = async () => {
   try {
     // Primeiro tenta admin
@@ -47,10 +45,8 @@ export const setupPopulateAuth = async () => {
   return false;
 };
 
-// Function to check if admin exists
 export const checkAdminExists = async (email) => {
   try {
-    // Try to login with admin credentials to check if exists
     const response = await adminApi.post('/auth', {
       email: email,
       senha: 'admin123'
@@ -62,7 +58,6 @@ export const checkAdminExists = async (email) => {
   }
 };
 
-// Interceptor para incluir token se disponível
 adminApi.interceptors.request.use(
   (config) => {
     if (populateToken) {

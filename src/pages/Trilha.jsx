@@ -239,7 +239,6 @@ export default function Trilha({ activeUser }) {
       // Atualiza o progresso local
       setProgresso(response.data)
       
-      // Trigger conquista update event
       window.dispatchEvent(new CustomEvent('conquistaUpdated'))
       
       // Atualizar o status dos nós baseado no novo progresso

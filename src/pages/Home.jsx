@@ -22,7 +22,6 @@ export default function Home() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Fetch progress for each trilha when user and trilhas are available
   useEffect(() => {
     if (!user?.id || trilhas.length === 0) {
       setTrilhasWithProgress(trilhas.map(trilha => ({
@@ -43,22 +42,15 @@ export default function Home() {
             const progressResponse = await getProgresso(user.id, trilha.id)
             const progress = progressResponse.data
             
-            // Calculate total possible XP from progress data
-            // The total XP should be at least the XP already gained
-            // For now, we'll use the XP gained as a reference and assume it's complete if 100%
             let totalPossibleXP = progress.xpGanho || 0
             if (progress.percentual > 0 && progress.percentual < 100) {
-              // Calculate total based on percentage: if user has X XP at Y%, total = X / (Y/100)
               totalPossibleXP = Math.round((progress.xpGanho || 0) / (progress.percentual / 100))
             } else if (progress.percentual === 100) {
-              // If 100% complete, xpGanho IS the total
               totalPossibleXP = progress.xpGanho || 0
             } else if (progress.percentual === 0) {
-              // If 0% complete, we need to estimate or use a default
-              totalPossibleXP = 100 // Default estimate
+              totalPossibleXP = 100
             }
             
-            // Determine status based on progress
             let status = 'Em andamento'
             if (progress.statusProgresso === 'CONCLUIDO') {
               status = 'Completo'
@@ -75,9 +67,7 @@ export default function Home() {
               userProgress: progress
             }
           } catch {
-            // No progress found - trilha not started
-            // Use a reasonable default for total XP
-            const totalPossibleXP = 100 // Default estimate for unstarted trilhas
+            const totalPossibleXP = 100
               
             return {
               ...trilha,

@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Tenta restaurar usuário do localStorage
     const accessToken = localStorage.getItem('accessToken');
     const userData = localStorage.getItem('user');
     if (accessToken && userData) {
@@ -17,7 +16,6 @@ export function AuthProvider({ children }) {
         setUser(JSON.parse(userData));
       } catch (error) {
         console.error('Erro ao restaurar dados do usuário:', error);
-        // Se houver erro na deserialização, limpar dados corrompidos
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
       }
@@ -29,10 +27,9 @@ export function AuthProvider({ children }) {
     try {
       const res = await loginApi(credentials);
       
-      // A authApi agora retorna: { success: boolean, token: string, user: object }
       if (res.data.success && res.data.token && res.data.user) {
         setUser(res.data.user);
-        return res.data.user; // Retorna os dados do usuário para quem chama
+        return res.data.user; 
       } else {
         throw new Error('Dados de login inválidos');
       }
