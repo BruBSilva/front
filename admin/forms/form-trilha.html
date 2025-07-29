@@ -131,7 +131,13 @@
             fetchCategorias();
 
             if (id) {
-                fetch(`http://localhost:8080/trilha/${id}`)
+                fetch(`http://localhost:8080/trilha/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
                     .then(response => {
                         if (!response.ok) throw new Error('Erro ao buscar trilha');
                         return response.json();
@@ -173,7 +179,12 @@
 
         async function fetchCategorias() {
             try {
-                const response = await fetch('http://localhost:8080/trilha/categorias');
+                const response = await fetch('http://localhost:8080/trilha/categorias', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (!response.ok) throw new Error('Erro ao buscar categorias');
                 const categorias = await response.json();
                 const select = document.getElementById('categoria');
@@ -302,7 +313,8 @@
             fetch(url, {
                 method: metodo,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(dados)
             })

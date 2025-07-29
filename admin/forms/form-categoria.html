@@ -23,7 +23,12 @@
         const id = params.get("id");
         document.addEventListener("DOMContentLoaded", function() {
             if (id) {
-                fetch('http://localhost:8080/trilha/categorias/' + id)
+                fetch('http://localhost:8080/trilha/categorias/' + id, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error("Erro ao buscar categoria");
@@ -64,7 +69,8 @@
             fetch(url, {
                 method: metodo,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(dados)
             })
