@@ -4,125 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário Trilha</title>
-</head>
-<body>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
     <div id="menu-container"></div>
-    <form onsubmit="enviarFormulario(event)">
-        <h1>Cadastro de Trilha</h1>
 
-        <p>
-            <label for="nome">Nome:</label>
-            <input type="text" id="nome" name="nome" required>
-        </p>
+    <div>
+        <form onsubmit="enviarFormulario(event)" class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+            <h1 class="text-2xl font-bold mb-6">Cadastro de Trilha</h1>
 
-        <p>
-            <label for="descricao">Descrição:</label>
-            <input type="text" id="descricao" name="descricao" required>
-        </p>
+            <div class="mb-4">
+                <label for="nome" class="block font-semibold">Nome:</label>
+                <input type="text" id="nome" name="nome" required class="w-full p-2 border rounded">
+            </div>
 
-        <p>
-            <label for="categorias">Categoria:</label>
-            <select name="categoria" id="categoria"></select>
-        </p>
+            <div class="mb-4">
+                <label for="descricao" class="block font-semibold">Descrição:</label>
+                <input type="text" id="descricao" name="descricao" required class="w-full p-2 border rounded">
+            </div>
 
-        <p>
-            <fieldset>
-                <legend>Conquista da Trilha</legend>
-                <div id="form-conquista-trilha">
-                    <input type="hidden" id="idConquista" name="idConquista">
-                    <p>
-                        <label for="nomeConquista">Nome:</label>
-                        <input type="text" id="nomeConquista" name="nomeConquista">
-                    </p>
-                    <p>
-                        <label for="descricaoConquista">Descrição:</label>
-                        <input type="text" id="descricaoConquista" name="descricaoConquista">
-                    </p>
-                    <p>
-                        <label for="xpGanho">XP Ganho:</label>
-                        <input type="number" id="xpGanho" name="xpGanho">
-                    </p>
+            <div class="mb-4">
+                <label for="categorias" class="block font-semibold">Categoria:</label>
+                <select name="categoria" id="categoria" class="w-full p-2 border rounded"></select>
+            </div>
+
+            <fieldset class="mb-6 border border-gray-300 p-4 rounded">
+                <legend class="font-semibold text-lg">Conquista da Trilha</legend>
+                <input type="hidden" id="idConquista" name="idConquista">
+
+                <div class="mb-2">
+                    <label for="nomeConquista" class="block">Nome:</label>
+                    <input type="text" id="nomeConquista" name="nomeConquista" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="mb-2">
+                    <label for="descricaoConquista" class="block">Descrição:</label>
+                    <input type="text" id="descricaoConquista" name="descricaoConquista" class="w-full p-2 border rounded">
+                </div>
+
+                <div>
+                    <label for="xpGanho" class="block">XP Ganho:</label>
+                    <input type="number" id="xpGanho" name="xpGanho" class="w-full p-2 border rounded">
                 </div>
             </fieldset>
-        </p>
 
-        <p>
-            <fieldset>
-                <legend>Módulos</legend>
-                <div id="modulos-container">
-                    <p>
-                        <label for="ordemModulo">Ordem:</label>
-                        <input type="number" id="ordemModulo" name="ordem">
-                    </p>
-                    <p>
-                        <label for="nomeModulo">Nome do Módulo:</label>
-                        <input type="text" id="nomeModulo" name="titulo">
-                    </p>
-                    <p>
-                        <label for="conteudoModulo">Conteúdo:</label>
-                        <br/>
-                        <input type="hidden" id="conteudoModulo" name="conteudo">
-                        <div id="editor">
-                            
-                        </div>
-                    </p>
-                    <p>
-                        <fieldset>
-                            <legend>Conquista do Módulo</legend>
-                            <div id="form-conquista-modulo">
-                                <p>
-                                    <label for="nomeConquista">Nome:</label>
-                                    <input type="text" id="nomeConquistaModulo" name="nomeConquistaModulo">
-                                </p>
-                                <p>
-                                    <label for="descricaoConquista">Descrição:</label>
-                                    <input type="text" id="descricaoConquistaModulo" name="descricaoConquistaModulo">
-                                </p>
-                                <p>
-                                    <label for="xpGanho">XP Ganho:</label>
-                                    <input type="number" id="xpGanhoModulo" name="xpGanhoModulo">
-                                </p>
-                            </div>
-                        </fieldset>
-                    </p>
-                    <button type="button" onclick="adicionarModulo()">Adicionar Módulo</button>
+            <fieldset class="mb-6 border border-gray-300 p-4 rounded">
+                <legend class="font-semibold text-lg">Módulos</legend>
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Conteúdo</th>
-                                <th>Ordem</th>
-                                <th colspan="2">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modulos-list">
-                            <!-- Os módulos adicionados serão exibidos aqui -->
-                        </tbody>
-                    </table>
+                <div class="mb-4">
+                    <label for="ordemModulo" class="block">Ordem:</label>
+                    <input type="number" id="ordemModulo" name="ordem" class="w-full p-2 border rounded">
                 </div>
+
+                <div class="mb-4">
+                    <label for="nomeModulo" class="block">Nome do Módulo:</label>
+                    <input type="text" id="nomeModulo" name="titulo" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="mb-4">
+                    <label for="conteudoModulo" class="block mb-1">Conteúdo:</label>
+                    <input type="hidden" id="conteudoModulo" name="conteudo">
+                    <div id="editor" class="border rounded p-2"></div>
+                </div>
+
+                <fieldset class="mb-4 border border-gray-200 p-4 rounded">
+                    <legend class="font-semibold">Conquista do Módulo</legend>
+                    <div class="mb-2">
+                        <label for="nomeConquistaModulo" class="block">Nome:</label>
+                        <input type="text" id="nomeConquistaModulo" name="nomeConquistaModulo" class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-2">
+                        <label for="descricaoConquistaModulo" class="block">Descrição:</label>
+                        <input type="text" id="descricaoConquistaModulo" name="descricaoConquistaModulo" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label for="xpGanhoModulo" class="block">XP Ganho:</label>
+                        <input type="number" id="xpGanhoModulo" name="xpGanhoModulo" class="w-full p-2 border rounded">
+                    </div>
+                </fieldset>
+
+                <button type="button" onclick="adicionarModulo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Adicionar Módulo</button>
+
+                <table class="w-full mt-4 table-auto border border-gray-300">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="px-4 py-2">Título</th>
+                            <th class="px-4 py-2">Conteúdo</th>
+                            <th class="px-4 py-2">Ordem</th>
+                            <th class="px-4 py-2" colspan="2">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modulos-list" class="bg-white">
+                        <!-- Módulos inseridos aparecem aqui -->
+                    </tbody>
+                </table>
             </fieldset>
-        </p>
-
-        <button type="submit">Enviar</button>
-
-    </form>
-
-    <p id="cadastrada"></p>
-
+            
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Enviar</button>
+        </form>
+        
+        <p id="cadastrada" class="mt-6 text-center font-semibold"></p>
+    </div>
+    <script src="/admin/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -332,6 +316,5 @@
             });
         }
     </script>
-    <script src="/admin/menu.js"></script>
 </body>
 </html>
