@@ -96,7 +96,7 @@ export default function Trilha({ activeUser }) {
   const [progresso, setProgresso] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const trilhaId = searchParams.get('id')
-  const { user } = useAuth()
+  const { user, updateUserTotalXP } = useAuth()
 
   // Usar o usuário ativo passado como prop ou o usuário logado
   const usuarioId = activeUser?.id || user?.id
@@ -113,6 +113,8 @@ export default function Trilha({ activeUser }) {
       return
     }
     
+    console.log('Debug: usuarioId =', usuarioId, 'trilhaId =', trilhaId, 'user =', user, 'activeUser =', activeUser);
+    
     // Buscar dados da trilha e progresso
     setIsLoading(true)
     // Primeiro buscar a trilha
@@ -120,19 +122,9 @@ export default function Trilha({ activeUser }) {
       .then(trilhaRes => {
         setTrilhaData(trilhaRes.data);
         
-        // Depois tentar buscar o progresso
         return getProgresso(usuarioId, trilhaId)
-          .catch(error => {
-            if (error.response?.status === 404) {
-              // Se não existe progresso, criar um novo
-              return createProgresso({
-                usuarioId,
-                trilhaId
-              });
-            }
-            throw error;
-          })
           .then(progressoRes => {
+            setStarted(true)
             setProgresso(progressoRes.data)
             
             // Gerar nós e arestas para estrutura linear
@@ -150,6 +142,9 @@ export default function Trilha({ activeUser }) {
               modId => modId === progressoRes.data.moduloAtual_id
             )
             
+            // Verificar se a trilha está concluída
+            const trilhaConcluida = progressoRes.data.percentual >= 100
+            
             // Criar nós para cada módulo em ordem linear
             modulosSorted.forEach((modulo, index) => {
               const nodeId = `module-${modulo.id}`
@@ -159,9 +154,17 @@ export default function Trilha({ activeUser }) {
                 modId => modId === modulo.id
               )
               
-              const isDone = moduloIndexInProgress !== -1 && moduloIndexInProgress < moduloAtualIndex
-              const isCurrent = modulo.id === progressoRes.data.moduloAtual_id
-              const isLocked = !isDone && !isCurrent
+              let isDone, isCurrent, isLocked
+              
+              if (trilhaConcluida) {
+                isDone = true
+                isCurrent = false
+                isLocked = false
+              } else {
+                isDone = moduloIndexInProgress !== -1 && moduloIndexInProgress < moduloAtualIndex
+                isCurrent = modulo.id === progressoRes.data.moduloAtual_id
+                isLocked = !isDone && !isCurrent
+              }
               
               // Criar nó do módulo
               nodesArray.push({
@@ -201,6 +204,14 @@ export default function Trilha({ activeUser }) {
               // Criar conexão com o módulo anterior
               if (index > 0) {
                 const prevNodeId = `module-${modulosSorted[index - 1].id}`
+                
+                let edgeColor
+                if (trilhaConcluida) {
+                  edgeColor = '#10b981'
+                } else {
+                  edgeColor = isDone || isCurrent ? '#10b981' : '#6b7280'
+                }
+                
                 edgesArray.push({
                   id: `edge-${index}`,
                   source: prevNodeId,
@@ -208,10 +219,10 @@ export default function Trilha({ activeUser }) {
                   target: nodeId,
                   targetHandle: `${nodeId}-top`,
                   style: { 
-                    stroke: isDone || isCurrent ? '#10b981' : '#6b7280',
+                    stroke: edgeColor,
                     strokeWidth: 2
                   },
-                  animated: isCurrent
+                  animated: !trilhaConcluida && isCurrent
                 })
               }
             })
@@ -221,12 +232,108 @@ export default function Trilha({ activeUser }) {
             setEdges(edgesArray)
             setIsLoading(false)
           })
+          .catch(error => {
+            console.log('No existing progress found (expected for new trilhas):', error.response?.status);
+            if (error.response?.status === 404) {
+              setStarted(false)
+              setProgresso(null)
+              
+              const modulosSorted = [...trilhaRes.data.modulos].sort((a, b) => a.ordem - b.ordem)
+              const nodesArray = []
+              const edgesArray = []
+              
+              const verticalSpacing = 150
+              const startY = 150
+              const centerX = 400
+              
+              modulosSorted.forEach((modulo, index) => {
+                const nodeId = `module-${modulo.id}`
+                const isFirst = index === 0
+                
+                nodesArray.push({
+                  id: nodeId,
+                  type: 'custom',
+                  position: { 
+                    x: centerX, 
+                    y: startY + (index * verticalSpacing) 
+                  },
+                  data: {
+                    label: modulo.titulo,
+                    xp: modulo.conquista?.xpGanho || 0,
+                    description: modulo.conteudo,
+                    isMain: true,
+                    done: false,
+                    isCurrent: isFirst,
+                    isLocked: !isFirst,
+                    moduleId: modulo.id,
+                    order: modulo.ordem,
+                    handles: [
+                      { 
+                        id: `${nodeId}-top`, 
+                        type: 'target', 
+                        position: Position.Top,
+                        style: { opacity: index === 0 ? 0 : 1 }
+                      },
+                      { 
+                        id: `${nodeId}-bottom`, 
+                        type: 'source', 
+                        position: Position.Bottom,
+                        style: { opacity: index === modulosSorted.length - 1 ? 0 : 1 }
+                      }
+                    ]
+                  }
+                })
+                
+                if (index > 0) {
+                  const prevNodeId = `module-${modulosSorted[index - 1].id}`
+                  edgesArray.push({
+                    id: `edge-${index}`,
+                    source: prevNodeId,
+                    sourceHandle: `${prevNodeId}-bottom`,
+                    target: nodeId,
+                    targetHandle: `${nodeId}-top`,
+                    style: { 
+                      stroke: '#6b7280',
+                      strokeWidth: 2
+                    },
+                    animated: false
+                  })
+                }
+              })
+              
+              setNodes(nodesArray)
+              setEdges(edgesArray)
+              setIsLoading(false)
+            } else {
+              throw error;
+            }
+          });
       })
       .catch(error => {
         console.error('Erro ao carregar dados:', error)
         setIsLoading(false)
       })
-  }, [trilhaId, usuarioId, setNodes, setEdges])
+  }, [trilhaId, usuarioId, user, activeUser, setNodes, setEdges])
+
+  const handleIniciarTrilha = async () => {
+    try {
+      console.log('Creating new progresso for usuarioId:', usuarioId, 'trilhaId:', trilhaId);
+      const result = await createProgresso({
+        usuarioId,
+        trilhaId
+      });
+      
+      console.log('createProgresso success:', result);
+      setProgresso(result.data);
+      setStarted(true);
+      
+      window.location.reload();
+      
+    } catch (createError) {
+      console.error('createProgresso failed:', createError);
+      alert('Erro ao iniciar trilha. Tente novamente.');
+    }
+  }
 
   // Função para concluir um módulo
   const handleCompleteModule = useCallback(async () => {
@@ -239,10 +346,16 @@ export default function Trilha({ activeUser }) {
       // Atualiza o progresso local
       setProgresso(response.data)
       
+      if (updateUserTotalXP && usuarioId) {
+        await updateUserTotalXP(usuarioId)
+      }
+      
       // Atualizar o status dos nós baseado no novo progresso
       const moduloAtualIndex = response.data.trilha_modulos.findIndex(
         modId => modId === response.data.moduloAtual_id
       )
+      
+      const trilhaConcluida = response.data.percentual >= 100
       
       setNodes(currentNodes =>
         currentNodes.map(node => {
@@ -252,9 +365,17 @@ export default function Trilha({ activeUser }) {
             modId => modId === node.data.moduleId
           )
           
-          const isDone = moduloIndexInProgress !== -1 && moduloIndexInProgress < moduloAtualIndex
-          const isCurrent = node.data.moduleId === response.data.moduloAtual_id
-          const isLocked = !isDone && !isCurrent
+          let isDone, isCurrent, isLocked
+          
+          if (trilhaConcluida) {
+            isDone = true
+            isCurrent = false
+            isLocked = false
+          } else {
+            isDone = moduloIndexInProgress !== -1 && moduloIndexInProgress < moduloAtualIndex
+            isCurrent = node.data.moduleId === response.data.moduloAtual_id
+            isLocked = !isDone && !isCurrent
+          }
           
           return {
             ...node,
@@ -275,16 +396,23 @@ export default function Trilha({ activeUser }) {
           const targetModuleIndex = response.data.trilha_modulos.findIndex(
             modId => modId === targetNode?.data.moduleId
           )
-          const targetIsDone = targetModuleIndex !== -1 && targetModuleIndex < moduloAtualIndex
-          const targetIsCurrent = targetNode?.data.moduleId === response.data.moduloAtual_id
+          
+          let edgeColor
+          if (trilhaConcluida) {
+            edgeColor = '#10b981'
+          } else {
+            const targetIsDone = targetModuleIndex !== -1 && targetModuleIndex < moduloAtualIndex
+            const targetIsCurrent = targetNode?.data.moduleId === response.data.moduloAtual_id
+            edgeColor = targetIsDone || targetIsCurrent ? '#10b981' : '#6b7280'
+          }
           
           return {
             ...edge,
             style: {
               ...edge.style,
-              stroke: targetIsDone || targetIsCurrent ? '#10b981' : '#6b7280'
+              stroke: edgeColor
             },
-            animated: targetIsCurrent
+            animated: !trilhaConcluida && targetNode?.data.moduleId === response.data.moduloAtual_id
           }
         })
       )
@@ -297,7 +425,7 @@ export default function Trilha({ activeUser }) {
       // Mostrar mensagem de erro para o usuário
       alert('Erro ao concluir módulo. Verifique se os dados da trilha estão corretos.')
     }
-  }, [progresso?.id, setNodes, setEdges, nodes])
+  }, [progresso?.id, setNodes, setEdges, nodes, updateUserTotalXP, usuarioId])
 
   // Atualizar a função toggleDone para usar handleCompleteModule
   const toggleDone = useCallback((id) => {
@@ -397,7 +525,7 @@ export default function Trilha({ activeUser }) {
           {!started && (
             <div className="absolute inset-0 z-20 bg-gradient-to-t from-black to-transparent flex items-center justify-center">
               <button
-                onClick={() => setStarted(true)}
+                onClick={handleIniciarTrilha}
                 className="px-40 absolute bottom-20 py-3 bg-[#e4e4e4] text-[#0e0e0e] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-colors duration-200"
               >
                 iniciar trilha
