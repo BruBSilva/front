@@ -1,19 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  setupPopulateAuth, 
-  createAluno, 
-  deleteUsuario, 
-  getAlunos,
-  createTrilha, 
-  deleteTrilha, 
-  getTrilhas,
-  getCategorias,
-  createCategoria,
-  createProgresso,
-  createUserConquista,
-  createAdmin,
-  checkAdminExists
-} from '../services/adminApi';
+import { createAluno, deleteUsuario, getAlunos, createAdmin } from '../services/userApi';
+import { createTrilha, deleteTrilha, getTrilhas, getCategorias, createCategoria } from '../services/trilhaApi';
+import { createProgresso } from '../services/learningApi';
+import { createUserConquista } from '../services/learningApi';
 
 
 
@@ -22,62 +11,169 @@ export default function PopulatePage() {
 
   const handleResetAndPopulate = async () => {
     let log = [];
+    let adminToken = null;
+    
     try {
-      // Primeiro verificar se admin já existe
-      console.log('Verificando se admin já existe...');
-      log.push('Verificando se admin já existe...');
-      
-      const adminExists = await checkAdminExists('admin@teste.com');
-      
-      if (!adminExists) {
-        console.log('Criando usuário admin para operações...');
-        log.push('Criando usuário admin para operações...');
-        try {
-          await createAdmin({
-            nome: 'Admin Teste',
-            email: 'admin@teste.com',
-            senha: 'admin123'
-          });
-          console.log('Admin criado com sucesso');
-          log.push('Admin criado com sucesso');
-        } catch (adminError) {
-          console.log('Erro ao criar admin:', adminError.message);
-          log.push('Erro ao criar admin: ' + adminError.message);
+      try {
+        const loginResponse = await fetch('http://localhost:8080/auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            email: 'admin@sistema.com', 
+            senha: 'admin123' 
+          })
+        });
+
+        if (loginResponse.ok) {
+          const adminData = await loginResponse.json();
+          adminToken = adminData.token || adminData.accessToken;
+          log.push('Login com admin existente realizado com sucesso.');
+          console.log('Admin logado:', adminData);
         }
-      } else {
-        console.log('Admin já existe, prosseguindo...');
-        log.push('Admin já existe, prosseguindo...');
+      } catch {
+        log.push('Admin padrão não encontrado, será criado um novo.');
       }
 
-      // Agora tentar configurar autenticação
-      console.log('Configurando autenticação...');
-      log.push('Configurando autenticação...');
-      await setupPopulateAuth();
-      console.log('Configuração concluída');
-      log.push('Configuração concluída');
+      if (adminToken) {
+        try {
+          localStorage.setItem('accessToken', adminToken);
+          const adminsResponse = await fetch('http://localhost:8080/usuario/admin', {
+            headers: {
+              'Authorization': `Bearer ${adminToken}`
+            }
+          });
+          
+          if (adminsResponse.ok) {
+            const adminsData = await adminsResponse.json();
+            console.log('Admins encontrados:', adminsData);
+            
+            const adminContent = adminsData.content || [];
+            const adminToDelete = adminContent.find(admin => admin.email === 'admin@sistema.com');
+            
+            if (adminToDelete) {
+              console.log('Admin encontrado para deletar:', adminToDelete);
+              const deleteResponse = await fetch(`http://localhost:8080/usuario/admin/${adminToDelete.id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${adminToken}`
+                }
+              });
+              
+              if (deleteResponse.ok) {
+                log.push('Admin existente removido com sucesso.');
+                adminToken = null;
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+              } else {
+                const errorText = await deleteResponse.text();
+                throw new Error(`Erro ao deletar admin: ${deleteResponse.status} - ${errorText}`);
+              }
+            } else {
+              log.push('Admin com email admin@sistema.com não encontrado na lista.');
+              adminToken = null;
+            }
+          } else {
+            log.push('Erro ao buscar lista de admins, continuando...');
+            adminToken = null;
+          }
+        } catch (e) {
+          log.push('Erro ao remover admin existente: ' + e.message);
+          adminToken = null;
+        }
+      }
 
-      // Apaga usuário pelo email se existir
+      if (!adminToken) {
+        try {
+          console.log('Criando admin...');
+          log.push('Criando admin...');
+          
+          const adminCriado = await createAdmin({
+            nome: 'Administrador do Sistema',
+            email: 'admin@sistema.com',
+            senha: 'admin123'
+          });
+          
+          log.push('Admin criado: ' + JSON.stringify(adminCriado.data));
+          
+          const loginResponse = await fetch('http://localhost:8080/auth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              email: 'admin@sistema.com', 
+              senha: 'admin123' 
+            })
+          });
+
+          if (loginResponse.ok) {
+            const adminData = await loginResponse.json();
+            adminToken = adminData.token || adminData.accessToken;
+            log.push('Admin criado e login realizado com sucesso.');
+            console.log('Admin criado e logado:', adminData);
+          } else {
+            throw new Error('Erro ao fazer login com admin criado');
+          }
+        } catch (e) {
+          const errorMessage = e?.response?.data?.message || e.message;
+          log.push('Erro ao criar admin: ' + errorMessage);
+          
+          if (errorMessage.includes('duplicar valor da chave') || errorMessage.includes('já existe')) {
+            log.push('Admin já existe, tentando fazer login...');
+            try {
+              const loginResponse = await fetch('http://localhost:8080/auth', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                  email: 'admin@sistema.com', 
+                  senha: 'admin123' 
+                })
+              });
+
+              if (loginResponse.ok) {
+                const adminData = await loginResponse.json();
+                adminToken = adminData.token || adminData.accessToken;
+                log.push('Login com admin existente realizado com sucesso após erro de criação.');
+              } else {
+                throw new Error('Não foi possível fazer login com admin existente');
+              }
+            } catch (loginError) {
+              log.push('Erro ao fazer login com admin existente: ' + loginError.message);
+              throw loginError;
+            }
+          } else {
+            throw e;
+          }
+        }
+      }
+
+      localStorage.setItem('accessToken', adminToken);
+
       try {
         const alunos = await getAlunos();
         console.log('Alunos encontrados:', alunos.data);
         log.push('Alunos encontrados: ' + JSON.stringify(alunos.data));
-        // Corrigido: buscar no array content
+        
         const alunoArr = Array.isArray(alunos.data.content) ? alunos.data.content : [];
-        const aluno = alunoArr.find(a => a.email === 'joao@teste.com');
-        if (aluno) {
+        const alunosTeste = alunoArr.filter(a => [
+          'joao@teste.com',
+          'maria@teste.com', 
+          'pedro@teste.com'
+        ].includes(a.email));
+        
+        for (const aluno of alunosTeste) {
           console.log('Deletando usuário:', aluno);
           await deleteUsuario(aluno.id);
-          console.log('Usuário deletado.');
-          log.push('Usuário deletado.');
-        } else {
-          console.log('Usuário não encontrado para deletar.');
-          log.push('Usuário não encontrado para deletar.');
+          log.push(`Usuário ${aluno.email} removido.`);
         }
       } catch (e) {
         console.error('Erro ao buscar/deletar usuário:', e);
         log.push('Erro ao buscar/deletar usuário: ' + (e?.response?.data?.message || e.message));
       }
-      // Apaga trilhas pelo nome se existirem
       try {
         const trilhas = await getTrilhas();
         console.log('Trilhas encontradas:', trilhas.data);
@@ -127,17 +223,36 @@ export default function PopulatePage() {
       }
 
       // Usuário
-      console.log('Criando usuário...');
-      log.push('Criando usuário...');
-      await createAluno({
-        nome: 'João Antonio A. B. Camilo',
-        email: 'joao@teste.com',
-        senha: '123456',
-        xpTotal: 1370,
-        nivel: 2
-      });
-      console.log('Usuário criado.');
-      log.push('Usuário criado.');
+      console.log('Criando alunos...');
+      log.push('Criando alunos...');
+      
+      const alunosParaCriar = [
+        {
+          nome: 'João Antonio A. B. Camilo',
+          email: 'joao@teste.com',
+          senha: '123456'
+        },
+        {
+          nome: 'Maria Silva Santos',
+          email: 'maria@teste.com',
+          senha: '123456'
+        },
+        {
+          nome: 'Pedro Oliveira Costa',
+          email: 'pedro@teste.com',
+          senha: '123456'
+        }
+      ];
+
+      for (const alunoData of alunosParaCriar) {
+        try {
+          const alunoResponse = await createAluno(alunoData);
+          log.push(`Aluno criado: ${alunoData.nome} (${alunoData.email})`);
+          console.log('Aluno criado:', alunoResponse.data);
+        } catch (e) {
+          log.push(`Erro ao criar aluno ${alunoData.email}: ` + (e?.response?.data?.message || e.message));
+        }
+      }
 
       // Trilhas
       console.log('Criando trilhas...');
@@ -682,6 +797,20 @@ export default function PopulatePage() {
       }
       console.log('Conquistas criadas.');
       log.push('Conquistas criadas.');
+      
+      // Fazer logout do admin para que o usuário possa fazer login como aluno
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      log.push('\n=== POPULATE CONCLUÍDO ===');
+      log.push('Admin criado: admin@sistema.com / admin123');
+      log.push('Alunos criados:');
+      log.push('- João: joao@teste.com / 123456');
+      log.push('- Maria: maria@teste.com / 123456');
+      log.push('- Pedro: pedro@teste.com / 123456');
+      log.push('\n>>> RECOMENDAÇÃO: Faça login como um dos alunos para testar o sistema <<<');
+      log.push('>>> Vá para /login e use um dos emails de aluno com senha 123456 <<<');
+      
       setResult('Dados resetados e populados com sucesso!\n' + log.join('\n'));
     } catch (err) {
       console.error('Erro ao popular dados:', err);

@@ -8,34 +8,9 @@ import AchievementsBox from "./AchievementsBox"
 export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
   const { user, logout } = useAuth()
   const [conquistas, setConquistas] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [userData, setUserData] = useState(user)
-  const [userDataLoading, setUserDataLoading] = useState(false)
 
-  const usuarioId = propUsuarioId || user?.id
-
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (user && user.id && (!user.nome || user.xpTotal === undefined)) {
-        setUserDataLoading(true)
-        try {
-          const response = await getUsuarioById(user.id)
-          setUserData(response.data)
-        } catch  {
-          setUserData(user)
-        } finally {
-          setUserDataLoading(false)
-        }
-      } else {
-        setUserData(user)
-      }
-    }
-
-    if (user) {
-      loadUserData()
-    }
-    setLoading(false)
-  }, [user])
+  const activeUser = user
+  const usuarioId = propUsuarioId || activeUser?.id
 
   useEffect(() => {
     if (usuarioId) {
@@ -46,43 +21,13 @@ export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
         })
         .catch(error => {
           console.error('Error fetching conquistas:', error)
-          setConquistas([]) // Definir como array vazio em caso de erro
+          setConquistas([])
         })
     } else {
       console.log('UserDrawer - No usuarioId, setting empty conquistas')
-      setConquistas([]) // Definir como array vazio se não houver usuário
+      setConquistas([])
     }
   }, [usuarioId])
-
-  const refreshConquistas = useCallback(() => {
-    if (usuarioId) {
-      getUserConquistas(usuarioId)
-        .then(res => {
-          const conquistasData = res.data?.content || []
-          setConquistas(conquistasData)
-        })
-        .catch()
-    }
-  }, [usuarioId])
-
-  useEffect(() => {
-    const handleConquistaUpdate = () => {
-      refreshConquistas()
-    }
-    
-    window.addEventListener('conquistaUpdated', handleConquistaUpdate)
-    return () => window.removeEventListener('conquistaUpdated', handleConquistaUpdate)
-  }, [refreshConquistas])
-
-  if (loading || userDataLoading) {
-    return (
-      <div className="h-screen w-full bg-[#E4E4E4] shadow-lg flex items-center justify-center">
-        <div className="text-lg">Carregando...</div>
-      </div>
-    )
-  }
-
-  const displayUser = userData || user
 
   return (
     <div className="h-screen w-full bg-[#E4E4E4] shadow-lg flex flex-col items-center p-7 space-y-12 relative">

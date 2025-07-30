@@ -17,7 +17,7 @@ export default function TrackDrawer({ node, onClose, onToggleDone }) {
         <button
           onClick={() => onToggleDone(node.id)}
           className={`flex items-center py-2 px-3 rounded-xl shadow-lg transition-colors duration-300 ${
-            node.data.done ? 'bg-green-500 text-white' : 
+            node.data.done ? 'bg-green-600 text-white cursor-default' : 
             node.data.isCurrent ? 'bg-blue-500 text-white hover:bg-blue-600' : 
             'bg-gray-400 text-gray-700 cursor-not-allowed'
           }`}
@@ -30,9 +30,9 @@ export default function TrackDrawer({ node, onClose, onToggleDone }) {
               'bg-gray-300'
             }`}
           />
-          {node.data.done ? 'Concluído' : 
+          {node.data.done ? 'Módulo Concluído' : 
            node.data.isCurrent ? 'Concluir Módulo' : 
-           'Bloqueado'}
+           'Módulo Bloqueado'}
         </button>
       </div>
 

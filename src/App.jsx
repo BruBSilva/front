@@ -15,31 +15,40 @@ function AppContent() {
   const [drawerOpen, setDrawerOpen] = useState(true)
   const { user } = useAuth()
 
+  const activeUser = user
+
   return (
       <Router>
         <div className="flex min-h-screen">
           <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
             <Routes>
+              <Route 
+                path="/trilha" 
+                element={
+                  <ProtectedRoute>
+                    <Trilha activeUser={activeUser} />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/login" element={<Login />} />
               <Route path="/cadastro" element={<Register />} />
-              <Route path="/trilha" element={
-                <ProtectedRoute>
-                  <Trilha activeUser={user} />
-                </ProtectedRoute>
-              } />
-              <Route path="/perfil" element={
-                <ProtectedRoute>
-                  <UserProfile />
-                </ProtectedRoute>
-              } />
-              <Route path="/populate" element={
-                  <PopulatePage />
-              } />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              } />
+              <Route 
+                path="/perfil" 
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/populate" element={<PopulatePage />} />
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import TrackCard from '../components/TrackCard'
 import ActionsBar from '../components/ActionsBar'
 import { useNavigate } from 'react-router-dom'
@@ -8,85 +8,112 @@ import { useAuth } from '../hooks/useAuth'
 
 export default function Home() {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const [trilhas, setTrilhas] = useState([])
+  const { user, updateUserTotalXP } = useAuth()
   const [trilhasWithProgress, setTrilhasWithProgress] = useState([])
   const [loading, setLoading] = useState(true)
   const [progressLoading, setProgressLoading] = useState(false)
   const [error, setError] = useState(null)
+  
+  const progressoCache = useRef(new Map())
+  const checkedTrilhas = useRef(new Set())
+  const lastUserId = useRef(null)
 
   useEffect(() => {
+    if (user?.id && user.id !== lastUserId.current) {
+      progressoCache.current.clear()
+      checkedTrilhas.current.clear()
+      lastUserId.current = user.id
+    }
+
     getTrilhas()
-      .then(res => setTrilhas(Array.isArray(res.data.content) ? res.data.content : []))
-      .catch(() => setError('Erro ao carregar trilhas'))
-      .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => {
-    if (!user?.id || trilhas.length === 0) {
-      setTrilhasWithProgress(trilhas.map(trilha => ({
-        ...trilha,
-        status: 'Não iniciado',
-        progress: 0,
-        xpGain: 0,
-        userProgress: null
-      })))
-      return
-    }
-
-    const fetchProgressForTrilhas = async () => {
-      setProgressLoading(true)
-      const trilhasWithProgressData = await Promise.all(
-        trilhas.map(async (trilha) => {
-          try {
-            const progressResponse = await getProgresso(user.id, trilha.id)
-            const progress = progressResponse.data
-            
-            let totalPossibleXP = progress.xpGanho || 0
-            if (progress.percentual > 0 && progress.percentual < 100) {
-              totalPossibleXP = Math.round((progress.xpGanho || 0) / (progress.percentual / 100))
-            } else if (progress.percentual === 100) {
-              totalPossibleXP = progress.xpGanho || 0
-            } else if (progress.percentual === 0) {
-              totalPossibleXP = 100
-            }
-            
-            let status = 'Em andamento'
-            if (progress.statusProgresso === 'CONCLUIDO') {
-              status = 'Completo'
-            } else if (progress.percentual === 0) {
-              status = 'Iniciado'
-            }
-
-            return {
-              ...trilha,
-              status,
-              progress: Math.round(progress.percentual || 0),
-              xp: totalPossibleXP,
-              xpGain: progress.xpGanho || 0,
-              userProgress: progress
-            }
-          } catch {
-            const totalPossibleXP = 100
+      .then(res => {
+        const trilhasData = Array.isArray(res.data.content) ? res.data.content : []
+        
+        if (user?.id && trilhasData.length > 0) {
+          return Promise.allSettled(
+            trilhasData.map(async (trilha) => {
+              const cacheKey = `${user.id}-${trilha.id}`
               
-            return {
-              ...trilha,
-              status: 'Não iniciado',
-              progress: 0,
-              xp: totalPossibleXP,
-              xpGain: 0,
-              userProgress: null
-            }
-          }
-        })
-      )
-      
-      setTrilhasWithProgress(trilhasWithProgressData)
-      setProgressLoading(false)
+              if (progressoCache.current.has(cacheKey)) {
+                const cachedData = progressoCache.current.get(cacheKey)
+                return {
+                  ...trilha,
+                  ...cachedData
+                }
+              }
+              
+              if (checkedTrilhas.current.has(cacheKey)) {
+                return {
+                  ...trilha,
+                  progresso: 0,
+                  xpGanho: 0,
+                  status: 'Não Iniciado'
+                }
+              }
+              
+              try {
+                const progressoRes = await getProgresso(user.id, trilha.id)
+                const progressoData = {
+                  progresso: progressoRes.data.percentual || 0,
+                  xpGanho: progressoRes.data.xpGanho || 0,
+                  status: progressoRes.data.percentual >= 100 ? 'Completo' : 
+                          progressoRes.data.percentual > 0 ? 'Em andamento' : 'Não Iniciado'
+                }
+                
+                progressoCache.current.set(cacheKey, progressoData)
+                
+                return {
+                  ...trilha,
+                  ...progressoData
+                }
+              } catch (error) {
+                checkedTrilhas.current.add(cacheKey)
+                
+                if (error.response?.status !== 404) {
+                  console.warn(`Erro ao buscar progresso para trilha ${trilha.id}:`, error.message);
+                }
+                return {
+                  ...trilha,
+                  progresso: 0,
+                  xpGanho: 0,
+                  status: 'Não Iniciado'
+                }
+              }
+            })
+          )
+        } else {
+          return trilhasData.map(trilha => ({
+            ...trilha,
+            progresso: 0,
+            xpGanho: 0,
+            status: 'Iniciado'
+          }))
+        }
+      })
+      .then(results => {
+        if (Array.isArray(results) && results.length > 0 && results[0]?.status) {
+          const trilhasComProgresso = results.map(result => 
+            result.status === 'fulfilled' ? result.value : result.reason
+          )
+          setTrilhasWithProgress(trilhasComProgresso)
+        } else {
+          setTrilhasWithProgress(results || [])
+        }
+        
+      })
+      .catch(error => {
+        console.error('Erro ao carregar trilhas:', error)
+        setError('Erro ao carregar trilhas. Use a página /populate para criar dados.')
+        setTrilhasWithProgress([])
+      })
+      .finally(() => setLoading(false))
+  }, [user?.id])
+  
+  useEffect(() => {
+    if (updateUserTotalXP && user?.id && trilhasWithProgress.length > 0) {
+      updateUserTotalXP(user.id)
     }
-
-    fetchProgressForTrilhas()
-  }, [user, trilhas])
+  }, [trilhasWithProgress, updateUserTotalXP, user?.id])
 
   if (loading) return <div className="text-white p-8">Carregando trilhas...</div>
   if (error) return <div className="text-red-500 p-8">{error}</div>
@@ -116,15 +143,15 @@ export default function Home() {
         onSort={() => {}} 
       />
       <div className="grid gap-6 p-6 transition-all duration-300 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-        {displayTrilhas.map((trilha) => (
+        {trilhasWithProgress.map((trilha) => (
           <TrackCard
             key={trilha.id}
             language={trilha.linguagem || trilha.nome}
             level={trilha.nivel || trilha.level || ''}
-            status={trilha.status}
-            xp={trilha.xp}
-            xpGain={trilha.xpGain}
-            progress={trilha.progress}
+            status={trilha.status || 'Iniciado'}
+            xp={trilha.xpGanho || 0}
+            xpGain={trilha.xpGanho || 0}
+            progress={trilha.progresso || 0}
             onAction={() => navigate(`/trilha?id=${trilha.id}`)}
           />
         ))}

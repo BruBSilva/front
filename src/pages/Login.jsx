@@ -1,52 +1,25 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import LoginForm from '../components/LoginForm'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Login() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const message = location.state?.message
+  const { login } = useAuth()
 
-  const handleLogin = () => {
-    // Redirecionar para home após login bem-sucedido
+  const handleLogin = async (credentials) => {
+    await login(credentials)
     navigate('/')
   }
 
   return (
-    <div className='text-white'>
-      <div>
-        <h1>
-          Corvis
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0e0e0e] text-white">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          Login - <span className="text-green-600">Corvis</span>
         </h1>
-        <p>
-          Faça login para continuar sua jornada de aprendizado
-        </p>
-      </div>
-      
-      {message && (
-        <div>
-          <div>
-            {message}
-          </div>
-        </div>
-      )}
-      
-      <div>
-        <LoginForm onLogin={handleLogin} />
-        
-        <div>
-          <p>
-            Não tem uma conta?{' '}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                navigate('/cadastro')
-              }}
-            >
-              Cadastre-se
-            </button>
-          </p>
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <LoginForm onLogin={handleLogin} />
         </div>
       </div>
     </div>

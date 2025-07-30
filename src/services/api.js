@@ -8,9 +8,13 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const isAuthEndpoint = config.url === '/auth' || config.url?.startsWith('/auth/');
+    
+    if (!isAuthEndpoint) {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -21,10 +25,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response && error.response.status === 401) {
-      // Se receber 401, redirecionar para login
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      console.warn('Token inválido ou expirado. Faça login novamente.');
     }
     return Promise.reject(error);
   }

@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   TrophyIcon,
   CheckCircleIcon,
   UserCircleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from '@heroicons/react/24/outline'
 
 const iconMap = {
@@ -12,41 +14,83 @@ const iconMap = {
 }
 
 export default function AchievementsBox({ conquistas = [] }) {
-  // Garantir que conquistas seja um array
+  const [isExpanded, setIsExpanded] = useState(false)
+  
   const conquistasArray = Array.isArray(conquistas) ? conquistas : []
+  const conquistasOrdenadas = [...conquistasArray].sort((a, b) => {
+    const dateA = new Date(a.dataConquista || a.data || 0)
+    const dateB = new Date(b.dataConquista || b.data || 0)
+    return dateB - dateA
+  })
+  
+  const conquistasExibidas = isExpanded ? conquistasOrdenadas : conquistasOrdenadas.slice(0, 2)
+  const temMaisConquistas = conquistasOrdenadas.length > 2
   
   return (
     <div className="mt-4 py-4 max-w-sm flex flex-col justify-center items-center bg-black/80 border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div className="px-4 mb-3">
         <h2 className="text-white text-lg font-semibold">
-          Conquistas
+          Conquistas ({conquistasOrdenadas.length})
         </h2>
       </div>
 
-      <div className="max-h-60 overflow-y-auto w-full">
+      <div className={`w-full transition-all duration-300 ${isExpanded ? 'max-h-64 overflow-y-auto' : 'max-h-32'}`}>
         <ul className="px-2">
-          {conquistasArray.map((item) => (
+          {conquistasExibidas.map((item) => (
             <li
               key={item.id}
-              className="flex items-center bg-gray-100 rounded-full justify-between px-14 pl-0 mb-1"
+              className="flex items-center bg-gray-100 rounded-full justify-between px-14 pl-0 mb-2 mx-2"
             >
               <div className="flex items-center space-x-2">
                 <div className="bg-white p-3 rounded-full">
                   {iconMap[item.icon] || iconMap['trophy']}
                 </div>
-                <span className="font-fancy text-black/80">{item.conquistaNome || item.nome || item.title}</span>
+                <span className="font-fancy text-black/80 text-sm">
+                  {item.conquistaNome || item.nome || item.title || 'Conquista'}
+                </span>
               </div>
               <div className="text-right text-[0.8rem] ml-3 -mr-8">
                 <div className="text-green-600 font-fancy text-[0.9rem]">
                   {item.conquistaXpGanho || item.xp || 0} XP
                 </div>
-                <div className=" text-gray-500">{item.dataConquista ? new Date(item.dataConquista).toLocaleDateString() : (item.data || item.date)}</div>
+                <div className="text-gray-500 text-xs">
+                  {item.dataConquista ? new Date(item.dataConquista).toLocaleDateString('pt-BR') : 
+                   (item.data ? new Date(item.data).toLocaleDateString('pt-BR') : 'Sem data')}
+                </div>
               </div>
             </li>
           ))}
+          
+          {conquistasExibidas.length === 0 && (
+            <li className="text-center text-gray-400 py-4">
+              <div className="bg-white p-3 rounded-full inline-block mb-2">
+                <TrophyIcon className="w-6 h-6 text-gray-400" />
+              </div>
+              <p className="text-sm">Nenhuma conquista ainda</p>
+              <p className="text-xs">Complete trilhas para ganhar conquistas!</p>
+            </li>
+          )}
         </ul>
       </div>
-      <button className="mt-2 px-4 py-1 bg-white rounded shadow text-black font-semibold">Ver Mais</button>
+      
+      {temMaisConquistas && (
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="mt-3 px-4 py-2 bg-white rounded-full shadow-md text-black font-semibold text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors"
+        >
+          {isExpanded ? (
+            <>
+              Ver Menos
+              <ChevronUpIcon className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              Ver Mais ({conquistasOrdenadas.length - 2}+)
+              <ChevronDownIcon className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      )}
     </div>
   )
 }
