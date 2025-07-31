@@ -20,34 +20,33 @@ async function fetchTrilhas() {
             card.className = "bg-white shadow-lg rounded-xl p-6 flex flex-col gap-4 border border-gray-200";
 
             card.innerHTML = `
-  <div class="flex justify-between items-center">
-    <div>
-      <h2 class="text-xl font-bold text-gray-800">${trilha.nome}</h2>
-      <p class="text-sm text-gray-600">${trilha.descricao}</p>
-      <p class="text-xs mt-1 text-gray-400">Categoria: ${trilha.categoria.nome}</p>
-    </div>
-  </div>
+              <div class="flex justify-between items-center">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-800">${trilha.nome}</h2>
+                  <p class="text-sm text-gray-600">${trilha.descricao}</p>
+                  <p class="text-xs mt-1 text-gray-400">Categoria: ${trilha.categoria.nome}</p>
+                </div>
+              </div>
 
-  <!-- Módulos com altura fixa e rolagem -->
-  <div class="mt-4 space-y-2 max-h-48 min-h-48 overflow-y-auto pr-2">
-    ${trilha.modulos.map(modulo => `
-      <div class="border-l-4 border-green-500 pl-3">
-        <h3 class="text-sm font-medium text-gray-700">${modulo.ordem} - ${modulo.titulo}</h3>
-        <div class="text-xs text-gray-600">${modulo.conteudo}</div>
-      </div>
-    `).join('')}
-  </div>
+              <!-- Módulos com altura fixa e rolagem -->
+              <div class="mt-4 space-y-2 max-h-48 min-h-48 overflow-y-auto pr-2">
+                ${trilha.modulos.map(modulo => `
+                  <div class="border-l-4 border-green-500 pl-3">
+                    <h3 class="text-sm font-medium text-gray-700">${modulo.ordem} - ${modulo.titulo}</h3>
+                    <div class="text-xs text-gray-600">${modulo.conteudo}</div>
+                  </div>
+                `).join('')}
+              </div>
 
-  <div class="flex justify-end gap-4 mt-6">
-    <a href="forms/form-trilha.html?id=${trilha.id}" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-      Editar
-    </a>
-    <a href="javascript:removerTrilha(${trilha.id})" class="text-red-600 hover:text-red-900 font-medium text-sm">
-      Excluir
-    </a>
-  </div>
-`;
-
+              <div class="flex justify-end gap-4 mt-6">
+                <a href="forms/form-trilha.html?id=${trilha.id}" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
+                  Editar
+                </a>
+                <a href="javascript:removerTrilha(${trilha.id})" class="text-red-600 hover:text-red-900 font-medium text-sm">
+                  Excluir
+                </a>
+              </div>
+            `;
             listElement.appendChild(card);
         });
 

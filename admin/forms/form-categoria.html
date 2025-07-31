@@ -1,101 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
+
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário Categoria</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
 </head>
-<body>
+
+<body class="bg-gray-100 text-gray-800">
     <div id="menu-container"></div>
-    <form onsubmit="enviarFormulario(event)">
-        <h1>Cadastro de Categoria</h1>
-        <p><label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" required></p>
 
-        <p><label for="descricao">Descrição:</label>
-        <input type="text" id="descricao" name="descricao" required></p>
+    <div>
+        <form onsubmit="enviarFormulario(event)" class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+            <h1 class="text-2xl font-bold mb-6">Cadastro de Trilha</h1>
 
-        <button type="submit">Enviar</button>
-    </form>
-    <p id="cadastrada"></p>
+            <div class="mb-4">
+                <label for="nome" class="block font-semibold">Nome:</label>
+                <input type="text" id="nome" name="nome" required class="w-full p-2 border rounded">
+            </div>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get("id");
-        document.addEventListener("DOMContentLoaded", function() {
-            if (id) {
-                fetch('http://localhost:8080/trilha/categorias/' + id, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("Erro ao buscar categoria");
-                        }
-                        return response.json();
-                    })
-                    .then(categoria => {
-                        document.getElementById('nome').value = categoria.nome;
-                        document.getElementById('descricao').value = categoria.descricao;
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        alert('Erro ao carregar categoria');
-                    });
-            }
-        });
-
-        function enviarFormulario(event) {
-            event.preventDefault();  // Evita o reload da página
-
-            const nome = document.getElementById('nome').value;
-            const descricao = document.getElementById('descricao').value;
-
-            const dados = {
-                nome: nome,
-                descricao: descricao
-            };
-
-            let url = 'http://localhost:8080/trilha/categorias';
-            let metodo = 'POST';
-
-            if (id) {
-                url += '/' + id;
-                metodo = 'PUT';
-                dados.id = id;
-            }
-
-            fetch(url, {
-                method: metodo,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(dados)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Erro na requisição');
-                return response.json();
-            })
-            .then(data => {
-                console.log('Sucesso:', data);
-                document.getElementById('cadastrada').textContent = 'Categoria salva com sucesso!';
-                if (id) {
-                    setTimeout(() => {
-                        window.location.href = '/admin/lista-dados-banco.html';
-                    }, 2000);
-                } else {
-                    document.getElementById('nome').value = '';
-                    document.getElementById('descricao').value = '';
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                document.getElementById('cadastrada').textContent = 'Erro ao salvar categoria.';
-            });
-        }
-    </script>
+            <div class="mb-4">
+                <label for="descricao" class="block font-semibold">Descrição:</label>
+                <input type="text" id="descricao" name="descricao" required class="w-full p-2 border rounded">
+            </div>
+            
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Enviar</button>
+        </form>
+        
+        <p id="cadastrada" class="mt-6 text-center font-semibold"></p>
+    </div>
     <script src="/admin/menu.js"></script>
+    <script src="/admin/js/form-categoria.js"></script>
 </body>
+
 </html>

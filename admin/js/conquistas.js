@@ -1,28 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-            fetchConquistas();
+    fetchConquistas();
+});
+
+async function fetchConquistas() {
+    try {
+        const response = await fetch('http://localhost:8080/trilha/conquistas', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
+        if (!response.ok) throw new Error('Erro ao buscar conquistas');
 
-        async function fetchConquistas() {
-            try {
-                const response = await fetch('http://localhost:8080/trilha/conquistas', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (!response.ok) throw new Error('Erro ao buscar conquistas');
-                
-                const conquistas = await response.json();
-                const listElement = document.getElementById('conquistas-list');
+        const conquistas = await response.json();
+        const listElement = document.getElementById('conquistas-list');
 
-                conquistas.content.forEach(conquista => {
-                    const card = document.createElement('div');
-                    card.className = "bg-white shadow-lg rounded-xl p-4 flex items-start gap-4 border border-gray-200";
-                    const tipoCor =
-                            conquista.tipo === "MODULO"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-orange-100 text-orange-800";
-                    card.innerHTML = `
+        conquistas.content.forEach(conquista => {
+            const card = document.createElement('div');
+            card.className = "bg-white shadow-lg rounded-xl p-4 flex items-start gap-4 border border-gray-200";
+            const tipoCor =
+                conquista.tipo === "MODULO"
+                    ? "bg-purple-100 text-purple-800"
+                    : "bg-orange-100 text-orange-800";
+            card.innerHTML = `
                             <!-- Ícone à esquerda -->
                             <div class="flex-shrink-0">
                                 <svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -46,9 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                             </div>
                         `;
-                    listElement.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        }
+            listElement.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}

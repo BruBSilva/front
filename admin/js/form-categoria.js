@@ -1,0 +1,76 @@
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+document.addEventListener("DOMContentLoaded", function () {
+    if (id) {
+        fetch('http://localhost:8080/trilha/categorias/' + id, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar categoria");
+                }
+                return response.json();
+            })
+            .then(categoria => {
+                document.getElementById('nome').value = categoria.nome;
+                document.getElementById('descricao').value = categoria.descricao;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao carregar categoria');
+            });
+    }
+});
+
+function enviarFormulario(event) {
+    event.preventDefault();  // Evita o reload da página
+
+    const nome = document.getElementById('nome').value;
+    const descricao = document.getElementById('descricao').value;
+
+    const dados = {
+        nome: nome,
+        descricao: descricao
+    };
+
+    let url = 'http://localhost:8080/trilha/categorias';
+    let metodo = 'POST';
+
+    if (id) {
+        url += '/' + id;
+        metodo = 'PUT';
+        dados.id = id;
+    }
+
+    fetch(url, {
+        method: metodo,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(dados)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na requisição');
+            return response.json();
+        })
+        .then(data => {
+            console.log('Sucesso:', data);
+            document.getElementById('cadastrada').textContent = 'Categoria salva com sucesso!';
+            if (id) {
+                setTimeout(() => {
+                    window.location.href = '/admin/lista-categorias.html';
+                }, 2000);
+            } else {
+                document.getElementById('nome').value = '';
+                document.getElementById('descricao').value = '';
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            document.getElementById('cadastrada').textContent = 'Erro ao salvar categoria.';
+        });
+}
