@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { createAluno, deleteUsuario, getAlunos, createAdmin } from '../services/userApi';
 import { createTrilha, deleteTrilha, getTrilhas, getCategorias, createCategoria } from '../services/trilhaApi';
-import { createProgresso } from '../services/learningApi';
-import { createUserConquista } from '../services/learningApi';
 
 
 
@@ -693,110 +691,6 @@ export default function PopulatePage() {
       });
       console.log('Trilhas criadas.');
       log.push('Trilhas criadas.');
-      // Buscar IDs reais do usuário e trilhas
-      const alunosNovos = await getAlunos();
-      const alunoArrNovos = Array.isArray(alunosNovos.data.content) ? alunosNovos.data.content : [];
-      const usuario = alunoArrNovos.find(a => a.email === 'joao@teste.com');
-      if (!usuario) throw new Error('Usuário criado não encontrado!');
-      const usuarioId = usuario.id;
-
-      const trilhasNovas = await getTrilhas();
-      const trilhaArrNovas = Array.isArray(trilhasNovas.data.content) ? trilhasNovas.data.content : [];
-      const trilha1 = trilhaArrNovas.find(t => t.nome === 'C#: Iniciante');
-      const trilha2 = trilhaArrNovas.find(t => t.nome === 'C++: Avançado');
-      const trilha3 = trilhaArrNovas.find(t => t.nome === 'C++: Iniciante');
-      const trilha4 = trilhaArrNovas.find(t => t.nome === 'JavaScript: Fundamentals');
-      const trilha5 = trilhaArrNovas.find(t => t.nome === 'Python: Data Science');
-      const trilha6 = trilhaArrNovas.find(t => t.nome === 'React: Modern Web Development');
-      const trilha7 = trilhaArrNovas.find(t => t.nome === 'Database Design & SQL');
-      
-      if (!trilha1 || !trilha2 || !trilha3 || !trilha4 || !trilha5 || !trilha6 || !trilha7) {
-        throw new Error('Trilhas criadas não encontradas!');
-      }
-
-      // Debug: log trilha IDs
-      console.log('IDs das trilhas encontradas:', {
-        trilha1: trilha1?.id,
-        trilha2: trilha2?.id,
-        trilha3: trilha3?.id,
-        trilha4: trilha4?.id,
-        trilha5: trilha5?.id,
-        trilha6: trilha6?.id,
-        trilha7: trilha7?.id
-      });
-      log.push('IDs das trilhas encontradas: ' + JSON.stringify({
-        trilha1: trilha1?.id,
-        trilha2: trilha2?.id,
-        trilha3: trilha3?.id,
-        trilha4: trilha4?.id,
-        trilha5: trilha5?.id,
-        trilha6: trilha6?.id,
-        trilha7: trilha7?.id
-      }));
-
-      console.log('Criando progresso...');
-      log.push('Criando progresso...');
-      await createProgresso({ usuarioId, trilhaId: trilha1.id, percentual: 60, xpGanho: 65, xpTotal: 100 });
-      await createProgresso({ usuarioId, trilhaId: trilha2.id, percentual: 40, xpGanho: 40, xpTotal: 100 });
-      await createProgresso({ usuarioId, trilhaId: trilha3.id, percentual: 75, xpGanho: 90, xpTotal: 120 });
-      await createProgresso({ usuarioId, trilhaId: trilha4.id, percentual: 30, xpGanho: 50, xpTotal: 165 });
-      await createProgresso({ usuarioId, trilhaId: trilha5.id, percentual: 80, xpGanho: 120, xpTotal: 150 });
-      await createProgresso({ usuarioId, trilhaId: trilha6.id, percentual: 20, xpGanho: 35, xpTotal: 175 });
-      await createProgresso({ usuarioId, trilhaId: trilha7.id, percentual: 60, xpGanho: 90, xpTotal: 150 });
-      console.log('Progresso criado.');
-      log.push('Progresso criado.');
-      // Conquistas
-      console.log('Criando conquistas...');
-      log.push('Criando conquistas...');
-      // Usando as conquistas das trilhas criadas
-      const conquistasParaCriar = [
-        {
-          trilha: trilha1,
-          data: '2025-12-23T00:00:00',
-        },
-        {
-          trilha: trilha2,
-          data: '2025-06-17T00:00:00',
-        },
-        {
-          trilha: trilha3,
-          data: '2025-06-10T00:00:00',
-        },
-        {
-          trilha: trilha4,
-          data: '2025-01-05T00:00:00',
-        },
-        {
-          trilha: trilha5,
-          data: '2024-12-20T00:00:00',
-        },
-        {
-          trilha: trilha6,
-          data: '2024-11-15T00:00:00',
-        },
-        {
-          trilha: trilha7,
-          data: '2024-10-30T00:00:00',
-        },
-      ];
-      for (const c of conquistasParaCriar) {
-        if (!c.trilha.conquista || !c.trilha.conquista.id) {
-          log.push('Conquista da trilha não encontrada para ' + c.trilha.nome);
-          continue;
-        }
-        await createUserConquista({
-          usuarioId,
-          conquistaId: c.trilha.conquista.id,
-          conquistaNome: c.trilha.conquista.nome,
-          conquistaDescricao: c.trilha.conquista.descricao,
-          conquistaTipo: c.trilha.conquista.tipo,
-          conquistaTrilha: c.trilha.nome,
-          conquistaXpGanho: c.trilha.conquista.xpGanho,
-          dataConquista: c.data,
-        });
-      }
-      console.log('Conquistas criadas.');
-      log.push('Conquistas criadas.');
       
       // Fazer logout do admin para que o usuário possa fazer login como aluno
       localStorage.removeItem('accessToken');

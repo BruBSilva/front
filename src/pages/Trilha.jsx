@@ -108,10 +108,6 @@ export default function Trilha({ activeUser }) {
 
   useEffect(() => {
     if (!trilhaId) return
-    if (!usuarioId) {
-      setIsLoading(false)
-      return
-    }
     
     console.log('Debug: usuarioId =', usuarioId, 'trilhaId =', trilhaId, 'user =', user, 'activeUser =', activeUser);
     
@@ -121,6 +117,80 @@ export default function Trilha({ activeUser }) {
     getTrilhaById(trilhaId)
       .then(trilhaRes => {
         setTrilhaData(trilhaRes.data);
+        
+        if (!usuarioId) {
+          // Se não há usuário, mostrar a trilha sem progresso e permitir iniciar
+          setStarted(false)
+          setProgresso(null)
+          
+          const modulosSorted = [...trilhaRes.data.modulos].sort((a, b) => a.ordem - b.ordem)
+          const nodesArray = []
+          const edgesArray = []
+          
+          const verticalSpacing = 150
+          const startY = 150
+          const centerX = 400
+          
+          modulosSorted.forEach((modulo, index) => {
+            const nodeId = `module-${modulo.id}`
+            const isFirst = index === 0
+            
+            nodesArray.push({
+              id: nodeId,
+              type: 'custom',
+              position: { 
+                x: centerX, 
+                y: startY + (index * verticalSpacing) 
+              },
+              data: {
+                label: modulo.titulo,
+                xp: modulo.conquista?.xpGanho || 0,
+                description: modulo.conteudo,
+                isMain: true,
+                done: false,
+                isCurrent: isFirst,
+                isLocked: !isFirst,
+                moduleId: modulo.id,
+                order: modulo.ordem,
+                handles: [
+                  { 
+                    id: `${nodeId}-top`, 
+                    type: 'target', 
+                    position: Position.Top,
+                    style: { opacity: index === 0 ? 0 : 1 }
+                  },
+                  { 
+                    id: `${nodeId}-bottom`, 
+                    type: 'source', 
+                    position: Position.Bottom,
+                    style: { opacity: index === modulosSorted.length - 1 ? 0 : 1 }
+                  }
+                ]
+              }
+            })
+            
+            if (index > 0) {
+              const prevNodeId = `module-${modulosSorted[index - 1].id}`
+              edgesArray.push({
+                id: `edge-${index}`,
+                source: prevNodeId,
+                sourceHandle: `${prevNodeId}-bottom`,
+                target: nodeId,
+                targetHandle: `${nodeId}-top`,
+                style: { 
+                  stroke: '#6b7280',
+                  strokeWidth: 2
+                },
+                animated: false
+              })
+            }
+          })
+          
+          setNodes(nodesArray)
+          setEdges(edgesArray)
+          setIsLoading(false)
+          return
+        }
         
         return getProgresso(usuarioId, trilhaId)
           .then(progressoRes => {
@@ -317,9 +387,16 @@ export default function Trilha({ activeUser }) {
 
   const handleIniciarTrilha = async () => {
     try {
-      console.log('Creating new progresso for usuarioId:', usuarioId, 'trilhaId:', trilhaId);
+      const currentUsuarioId = activeUser?.id || user?.id
+      
+      if (!currentUsuarioId) {
+        alert('Você precisa estar logado para iniciar uma trilha.');
+        return;
+      }
+      
+      console.log('Creating new progresso for usuarioId:', currentUsuarioId, 'trilhaId:', trilhaId);
       const result = await createProgresso({
-        usuarioId,
+        usuarioId: currentUsuarioId,
         trilhaId
       });
       

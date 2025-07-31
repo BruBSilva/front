@@ -1,6 +1,5 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { getUserConquistas } from "../services/learningApi"
-import { getUsuarioById } from "../services/userApi"
 import { useAuth } from '../hooks/useAuth.js'
 import UserAvatar from "./UserAvatar"
 import AchievementsBox from "./AchievementsBox"
@@ -41,18 +40,18 @@ export default function UserDrawer({ setOpen, usuarioId: propUsuarioId }) {
       </button>
       
       <UserAvatar 
-        level={displayUser?.nivel || 1} 
-        xp={displayUser?.xpTotal || 0} 
+        level={activeUser?.nivel || 1} 
+        xp={activeUser?.xpTotal || 0} 
       />
       
-      <div className="text-green-700 font-fancy">XP: {displayUser?.xpTotal || 0}</div>
-      <div className="text-black/80 text-2xl font-semibold font-fancy">{displayUser?.nome || 'Usuário'}</div>
+      <div className="text-green-700 font-fancy">XP: {activeUser?.xpTotal || 0}</div>
+      <div className="text-black/80 text-2xl font-semibold font-fancy">{activeUser?.nome || 'Usuário'}</div>
       
       <div className="w-full px-5">
         <AchievementsBox conquistas={conquistas} />
       </div>
 
-      {displayUser && (
+      {activeUser && (
         <button 
           onClick={logout} 
           className="w-56 h-8 border-[2px] absolute bottom-10 left-1/2 -translate-x-1/2 border-red-500/70 text-red-600/80 rounded-md hover:bg-red-500/80 hover:text-white"

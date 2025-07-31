@@ -5,7 +5,6 @@ export default function LoginForm({ onLogin }) {
   const [senha, setSenha] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
