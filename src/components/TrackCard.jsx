@@ -2,7 +2,7 @@ import React from 'react'
 
 const statusColors = {
   'Em andamento': 'bg-yellow-300',
-  'Não iniciado': 'bg-gray-400',
+  'Não Iniciado': 'bg-gray-400',
   'Carregando...': 'bg-gray-300',
   Iniciado:     'bg-blue-400',
   Completo:     'bg-green-500',

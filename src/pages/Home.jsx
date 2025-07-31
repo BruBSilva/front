@@ -11,7 +11,6 @@ export default function Home() {
   const { user, updateUserTotalXP } = useAuth()
   const [trilhasWithProgress, setTrilhasWithProgress] = useState([])
   const [loading, setLoading] = useState(true)
-  const [progressLoading, setProgressLoading] = useState(false)
   const [error, setError] = useState(null)
   
   const progressoCache = useRef(new Map())
@@ -57,7 +56,7 @@ export default function Home() {
                   progresso: progressoRes.data.percentual || 0,
                   xpGanho: progressoRes.data.xpGanho || 0,
                   status: progressoRes.data.percentual >= 100 ? 'Completo' : 
-                          progressoRes.data.percentual > 0 ? 'Em andamento' : 'Não Iniciado'
+                          progressoRes.data.percentual >= 0 ? 'Em andamento' : 'Não Iniciado'
                 }
                 
                 progressoCache.current.set(cacheKey, progressoData)
@@ -86,7 +85,7 @@ export default function Home() {
             ...trilha,
             progresso: 0,
             xpGanho: 0,
-            status: 'Iniciado'
+            status: 'Não Iniciado'
           }))
         }
       })
@@ -117,14 +116,6 @@ export default function Home() {
 
   if (loading) return <div className="text-white p-8">Carregando trilhas...</div>
   if (error) return <div className="text-red-500 p-8">{error}</div>
-
-  const displayTrilhas = trilhasWithProgress.length > 0 ? trilhasWithProgress : trilhas.map(trilha => ({
-    ...trilha,
-    status: 'Carregando...',
-    progress: 0,
-    xp: 100,
-    xpGain: 0
-  }))
 
   return (
     <div className=" min-w-screen bg-[#0e0e0e] text-white">
