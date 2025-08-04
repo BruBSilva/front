@@ -20,7 +20,8 @@ function AppContent() {
   return (
       <Router>
         <div className="flex min-h-screen">
-          <div className={`flex-1 overflow-y-auto transition-all duration-300 ${drawerOpen ? 'pr-96' : 'pr-0'}`}>
+          <div className={`flex-1 overflow-y-auto transition-all duration-300`}>
+              {/*  ${drawerOpen ? 'pr-96' : 'pr-0'} removido por limitar tamanho da tela */}
             <Routes>
               <Route 
                 path="/trilha" 
