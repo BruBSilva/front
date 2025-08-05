@@ -1,9 +1,9 @@
-const user = sessionStorage.getItem('user');
-const token = user ? JSON.parse(user).token : null;
+const user = localStorage.getItem('user');
+const token = localStorage.getItem('accessToken');
 
 document.addEventListener("DOMContentLoaded", function() {
-  if (!sessionStorage.getItem('user')) {
-    window.location.href = '/admin/login.html';
+  if (!localStorage.getItem('user')) {
+    window.location.href = '/login';
   }
 
 
@@ -12,8 +12,9 @@ document.addEventListener("DOMContentLoaded", function() {
   .then(data => {
     document.getElementById('menu-container').innerHTML = data;
     document.getElementById('btnLogout').addEventListener('click', function() {
-      sessionStorage.removeItem('user');
-      window.location.href = '/admin/login.html';
+      localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+      window.location.href = '/login';
     });
   })
   .catch(error => console.error('Erro ao carregar o menu:', error))
