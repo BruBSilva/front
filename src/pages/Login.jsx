@@ -9,6 +9,12 @@ export default function Login() {
 
   const handleLogin = async (credentials) => {
     await login(credentials)
+    
+    if (JSON.parse(localStorage.getItem('user')).role === 'ADMIN') {
+      window.location.href = '/admin/lista-trilhas.html'
+      return
+    }
+    
     navigate('/')
   }
 

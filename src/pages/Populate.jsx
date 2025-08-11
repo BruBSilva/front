@@ -270,7 +270,7 @@ export default function PopulatePage() {
         modulos: [
           {
             titulo: 'Introdução ao C#',
-            conteudo: '<p>Primeiros passos com C#</p>',
+            conteudo: 'c# (pronuncia-se c sharp) é uma linguagem de programação moderna, orientada a objetos, criada pela microsoft no início dos anos 2000 como parte da plataforma .net. ela foi desenhada pra combinar o poder e a performance de linguagens como c++ com a simplicidade e a produtividade de linguagens como java. c# permite escrever aplicações robustas, desde programas de desktop e servidores web até jogos e apps móveis — especialmente quando combinado com frameworks como asp.net, unity e xamarin.\n\na sintaxe de c# é familiar pra quem já mexeu com outras linguagens baseadas em c, mas o destaque real tá na segurança de tipos, no gerenciamento automático de memória (sim, adeus malloc), e na vasta biblioteca padrão. além disso, c# oferece suporte a recursos modernos como LINQ, programação assíncrona com async/await, e até pattern matching — tudo isso com uma pegada bem clean. se você tá começando agora, c# é uma porta de entrada bem versátil e poderosa pro mundo da programação profissional.',
             ordem: 1,
             conquista: {
               nome: 'Módulo 1 C#',

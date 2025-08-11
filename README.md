@@ -67,7 +67,6 @@ front/
 ├── src/
 │   ├── components/   # componentes reutilizáveis
 │   ├── pages/        # páginas principais
-│   ├── store/        # redux ou zustand (por enquanto ainda não é usado)
 │   └── App.jsx       # componente principal
 ├── package.json
 └── vite.config.js
