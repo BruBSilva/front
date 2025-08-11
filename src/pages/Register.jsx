@@ -58,9 +58,9 @@ export default function Register() {
 
       console.log('Usuário criado com sucesso:', result)
 
-      navigate('/login', { 
-        state: { 
-          message: 'Cadastro realizado com sucesso! Faça login para continuar.' 
+      navigate('/login', {
+        state: {
+          message: 'Cadastro realizado com sucesso! Faça login para continuar.'
         }
       })
     } catch (err) {
@@ -68,7 +68,7 @@ export default function Register() {
       console.error('Response:', err.response)
       console.error('Status:', err.response?.status)
       console.error('Data:', err.response?.data)
-      
+
       if (err.response && err.response.status === 400) {
         setError('Dados inválidos. Verifique os campos.')
       } else if (err.response && err.response.status === 409) {
@@ -81,87 +81,92 @@ export default function Register() {
     }
   }
 
-  return (
-    <div className='text-white'>
-      <div>
-        <h1>
-          Corvis
-        </h1>
-        <p>
-          Crie sua conta e comece sua jornada de aprendizado
+return (
+    <div className="flex min-h-screen font-inria text-lg">
+      {/* painel esquerdo */}
+      <div className="flex-1 bg-[#0e0e0e] text-white flex flex-col justify-center px-16">
+        <h1 className="text-5xl font-bold mb-4 text-green-500">Bem Vindo ao Corvis!</h1>
+        <p className="max-w-xl leading-relaxed">
+          Prepare-se para explorar trilhas repletas de descobertas, colecionar
+          conquistas e desvendar novas habilidades em um universo gamificado
+          criado especialmente para você.
         </p>
       </div>
-      
-      <div>
-        <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+
+      <div className="flex-none w-[30%] max-w-md bg-gray-200 p-8 lg:p-10 rounded-l-2xl shadow-lg flex flex-col items-center space-y-6">
+        <img
+          src="/src/assets/logomarca.jpg"
+          alt="Corvis"
+          className="h-32 w-32 rounded-full object-cover"
+        />
+        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center space-y-3">
+        <h2 className="text-3xl font-semibold text-center mb-4">
+          Registro </h2>
+        <div className="w-full flex flex-col items-start space-y-2">
               <input
                 type="text"
                 name="nome"
                 placeholder="Nome completo"
                 value={formData.nome}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                className="block w-full p-4 bg-gray-700 text-white border border-gray-600 py-2.5 rounded-2xl focus:border-green-500 focus:outline-none transition-colors"
                 required
               />
             </div>
-            
-            <div>
+            <div className="w-full flex flex-col items-start space-y-2">
               <input
                 type="email"
                 name="email"
                 placeholder="E-mail"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                className="block w-full p-4 bg-gray-700 text-white border border-gray-600 py-2.5 rounded-2xl focus:border-green-500 focus:outline-none transition-colors"
                 required
               />
             </div>
-            
-            <div>
+
+            <div className="w-full flex flex-col items-start space-y-2">
               <input
                 type="password"
                 name="senha"
                 placeholder="Senha (mínimo 6 caracteres)"
                 value={formData.senha}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                className="block w-full p-4 bg-gray-700 text-white border border-gray-600 py-2.5 rounded-2xl focus:border-green-500 focus:outline-none transition-colors"
                 required
                 minLength={6}
               />
             </div>
-            
-            <div>
+
+            <div className="w-full flex flex-col items-start space-y-2">
               <input
                 type="password"
                 name="confirmSenha"
                 placeholder="Confirmar senha"
                 value={formData.confirmSenha}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                className="block w-full p-4 bg-gray-700 text-white border border-gray-600 py-2.5 rounded-2xl focus:border-green-500 focus:outline-none transition-colors"
                 required
               />
             </div>
-            
+
             {error && (
               <div className="text-red-400 text-sm text-center bg-red-900/20 p-3 rounded-lg border border-red-800">
                 {error}
               </div>
             )}
-            
+
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-1/2 bg-green-600 hover:bg-green-700 text-white py-1 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg"
               disabled={loading}
             >
               {loading ? 'Criando conta...' : 'Criar conta'}
             </button>
           </form>
-          
+
           <div>
-            <p>
-              Já tem uma conta?{' '}
+            <p className="text-sm text-gray-700 hover:text-green-600 font-medium">
               <button
                 type="button"
                 onClick={(e) => {
@@ -169,11 +174,11 @@ export default function Register() {
                   navigate('/login')
                 }}
               >
-                Faça login
+                Já tem uma conta?
+                <span className="font-semibold"> Faça Login</span>
               </button>
             </p>
           </div>
-        </div>
       </div>
     </div>
   )

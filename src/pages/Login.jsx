@@ -1,6 +1,5 @@
-// src/pages/Login.js
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import LoginForm from '../components/LoginForm'
 import { useAuth } from '../hooks/useAuth'
 
@@ -50,6 +49,13 @@ export default function Login() {
           <button className="text-gray-600 hover:text-gray-800 font-medium">
             Esqueci minha senha?
           </button>
+        </div>
+
+        {/* Link centralizado para cadastro, com espaçamento em relação ao "Esqueci minha senha" */}
+        <div className="w-full mt-6 flex justify-center">
+          <Link to="/cadastro" className="text-sm text-gray-700 hover:text-green-600 font-medium">
+            Não tem conta? <span className="font-semibold">Registre</span>
+          </Link>
         </div>
       </div>
     </div>
