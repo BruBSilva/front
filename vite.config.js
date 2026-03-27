@@ -19,7 +19,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        mockServiceWorker: resolve(__dirname, 'public/mockServiceWorker.js'),
       },
     },
   },
