@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { createAluno } from '../services/userApi'
 import { useNavigate } from 'react-router-dom'
+import logoImage from '../assets/logomarca.jpg'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -95,7 +96,7 @@ return (
 
       <div className="flex-none w-[30%] max-w-md bg-gray-200 p-8 lg:p-10 rounded-l-2xl shadow-lg flex flex-col items-center space-y-6">
         <img
-          src="/src/assets/logomarca.jpg"
+          src={logoImage}
           alt="Corvis"
           className="h-32 w-32 rounded-full object-cover"
         />

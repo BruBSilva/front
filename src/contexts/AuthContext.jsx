@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { login as loginApi } from '../services/authApi';
 import { getUserConquistas } from '../services/learningApi';
 
@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const updateUserTotalXP = async (userId) => {
+  const updateUserTotalXP = useCallback(async (userId) => {
     try {
       const conquistasRes = await getUserConquistas(userId);
       const conquistas = conquistasRes.data?.content || [];
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
       console.warn('Erro ao calcular XP total:', error);
       return 0;
     }
-  };
+  }, []);
 
   const login = async (credentials) => {
     const res = await loginApi(credentials);
